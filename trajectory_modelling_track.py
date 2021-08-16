@@ -1,5 +1,7 @@
 import pandas as pd
 import glob
+import numpy as np
+import matplotlib.pyplot as plt
 
 path = '/Users/tassjames/Desktop/Olympic_data/olympic_data/field' # use your path
 all_files = glob.glob(path + "/*.csv")
@@ -12,11 +14,9 @@ for filename in all_files:
     li.append(df)
     li_specialised.append(df_slice)
 
+# Generate dataframe with attributes of interest
 frame = pd.concat(li, axis=0, ignore_index=True)
 frame_sp = pd.concat(li_specialised, axis=0, ignore_index=True)
 
-# Change date format to just year
-
-# Grab best performance of each year
-
-# Plot trajectories etc
+# Change date format to just year %YYYY
+frame_sp['Date'] = frame_sp['Date'].astype(str).str.extract('(\d{4})').astype(int)
