@@ -18,11 +18,8 @@ for filename in all_files:
 # Generate dataframe with attributes of interest
 frame = pd.concat(li, axis=0, ignore_index=True)
 frame_sp = pd.concat(li_specialised, axis=0, ignore_index=True)
-# frame_sp = frame_sp.dropna(subset=['Date']) # Drop N/As on Date
 
 # Change date format to just year %YYYY
-# frame_sp['Date'] = frame_sp['Date'].astype(str).str.extract('(\d{2})').astype(int)
-# frame_sp['Date'] = frame_sp['Date'].datetime.strptime("%d/%m/%Y").strftime("%Y")
 frame_sp['Date_Y'] = frame_sp['Date'].str[-2:]
-# lastconnection = datetime.strptime("21/12/2008", "%d/%m/%Y").strftime('%Y-%m-%d')
-block = 1
+frame_sp['Date_Y'] = str("20") + frame_sp['Date'].str[-2:]
+

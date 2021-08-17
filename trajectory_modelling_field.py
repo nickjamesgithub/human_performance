@@ -2,11 +2,12 @@ import pandas as pd
 import glob
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.fftpack import fftshift, fft
 
 path = '/Users/tassjames/Desktop/Olympic_data/olympic_data/field' # use your path
 all_files = glob.glob(path + "/*.csv")
 
-model = "variance" #l1_best, variance
+model = "mean_variance" #l1_best, mean_variance
 
 li = []
 li_specialised = []
@@ -125,27 +126,73 @@ if model == "l1_best":
     anomaly_ordered = anomaly_scores[anomaly_scores[:, 0].argsort()]
     print(anomaly_ordered)
 
-
-if model == "variance":
+if model == "mean_variance":
+    # Years
     years = np.linspace(2001,2021,21)
+    # Mean/Variance event year
+    mean_event_year_men = []
     variance_event_year_men = []
+    mean_event_year_women = []
+    variance_event_year_women = []
+
     for i in range(len(years)):
         men_year = frame_sp[(frame_sp['gender'] == "men") & (frame_sp['Date'] == years[i])]
         women_year = frame_sp[(frame_sp['gender'] == "women") & (frame_sp['Date'] == years[i])]
         events_list = men_year["event"].unique()
         events_name = ['discus', 'high jump', 'shot put', 'triple jump', 'pole vault', 'long jump', 'javelin',
                        'hammer throw']
-        variance_list = []
+        # Mean/Variance List
+        mean_list_m = []
+        variance_list_m = []
+        mean_list_w = []
+        variance_list_w = []
         for j in range(len(events_list)): # For each year, append the variance of performance in each sport
             men_event = men_year[(men_year['event'] == events_list[j])]
-            mark = men_event["Mark"]
-            marks_var = np.var(mark)
-            variance_list.append(marks_var)
-        variance_event_year_men.append(variance_list)
+            mark_m = men_event["Mark"]
+            # Compute mean and variance
+            marks_mean_m = np.mean(mark_m)
+            marks_variance_m = np.var(mark_m)
 
-    variance_event_array = np.array(variance_event_year_men)
-    # Plot variance of all sports
-    for i in range(len(variance_event_array[0])):
-        plt.plot(years, variance_event_array[:,i])
+            # Compute mean and variance lists
+            mean_list_m.append(marks_mean_m)
+            variance_list_m.append(marks_variance_m)
+
+            women_event = women_year[(women_year['event'] == events_list[j])]
+            mark_w = women_event["Mark"]
+            # Compute mean and variance
+            marks_mean_w = np.mean(mark_w)
+            marks_variance_w = np.var(mark_w)
+
+            # Compute mean and variance lists
+            mean_list_w.append(marks_mean_w)
+            variance_list_w.append(marks_variance_w)
+
+        # Mean event year men
+        mean_event_year_men.append(mean_list_m)
+        variance_event_year_men.append(variance_list_m)
+
+        # Mean event year women
+        mean_event_year_women.append(mean_list_w)
+        variance_event_year_women.append(variance_list_w)
+
+    # Make arrays
+    variance_event_array_m = np.array(variance_event_year_men)
+    mean_event_array_m = np.array(mean_event_year_men)
+    variance_event_array_w = np.array(variance_event_year_women)
+    mean_event_array_w = np.array(mean_event_year_women)
+
+    # Plot Mean of all sports
+    for i in range(len(mean_event_year_men[0])):
+        plt.scatter(years, mean_event_array_m[:,i], label="Men")
+        plt.scatter(years, mean_event_array_w[:, i], label="Women")
         plt.title(events_list[i])
+        plt.legend()
+        plt.show()
+
+    # Plot Variance of all sports
+    for i in range(len(variance_event_array_m[0])):
+        plt.plot(years, variance_event_array_m[:, i], label="Men")
+        plt.plot(years, variance_event_array_w[:, i], label="Women")
+        plt.title(events_list[i])
+        plt.legend()
         plt.show()
