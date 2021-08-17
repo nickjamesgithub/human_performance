@@ -155,7 +155,7 @@ if model == "mean_variance":
         mean_list_w = []
         variance_list_w = []
         for j in range(len(events_list)): # For each year, append the variance of performance in each sport
-            men_event = men_year[(men_year['event'] == events_list[j])]
+            men_event = men_year[(men_year['event'] == events_list[j])] #
             mark_m = men_event["Mark_seconds"]
             # Compute mean and variance
             marks_mean_m = np.mean(mark_m)
