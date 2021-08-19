@@ -24,7 +24,7 @@ frame_sp['Date_Y'] = frame_sp['Date'].str[-2:]
 frame_sp['Date_Y'] = str("20") + frame_sp['Date'].str[-2:]
 frame_sp['Mark_seconds'] = pd.to_numeric(frame_sp['Mark_seconds'], errors='coerce')
 
-model = "mean_variance" # l1_best, mean_variance
+model = "l1_best" # l1_best, mean_variance
 
 if model == "l1_best":
     # Grab best performance of each year

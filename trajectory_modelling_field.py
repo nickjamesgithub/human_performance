@@ -141,6 +141,7 @@ if model == "mean_variance":
         events_list = men_year["event"].unique()
         events_name = ['discus', 'high jump', 'shot put', 'triple jump', 'pole vault', 'long jump', 'javelin',
                        'hammer throw']
+        events_name.sort()
         # Mean/Variance List
         mean_list_m = []
         variance_list_m = []
@@ -182,17 +183,19 @@ if model == "mean_variance":
     mean_event_array_w = np.array(mean_event_year_women)
 
     # Plot Mean of all sports
-    for i in range(len(mean_event_year_men[0])):
+    for i in range(len(events_name)):
         plt.scatter(years, mean_event_array_m[:,i], label="Men")
         plt.scatter(years, mean_event_array_w[:, i], label="Women")
-        plt.title(events_list[i])
+        plt.title(events_name[i])
         plt.legend()
+        plt.savefig(events_name[i])
         plt.show()
 
-    # Plot Variance of all sports
-    for i in range(len(variance_event_array_m[0])):
-        plt.plot(years, variance_event_array_m[:, i], label="Men")
-        plt.plot(years, variance_event_array_w[:, i], label="Women")
-        plt.title(events_list[i])
-        plt.legend()
-        plt.show()
+    # # Plot Variance of all sports
+    # for i in range(len(variance_event_array_m[0])):
+    #     plt.plot(years, variance_event_array_m[:, i], label="Men")
+    #     plt.plot(years, variance_event_array_w[:, i], label="Women")
+    #     plt.title(events_name[i])
+    #     plt.savefig(events_name[i])
+    #     plt.legend()
+    #     plt.show()
