@@ -2,7 +2,7 @@ import pandas as pd
 import glob
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.fftpack import fftshift, fft
+import re
 
 path = '/Users/tassjames/Desktop/Olympic_data/olympic_data/field' # use your path
 all_files = glob.glob(path + "/*.csv")
@@ -182,6 +182,9 @@ if model == "mean_variance":
     variance_event_array_w = np.array(variance_event_year_women)
     mean_event_array_w = np.array(mean_event_year_women)
 
+    # relabel
+    label = re.sub('[!@#$\/]', '', events_list_m[i])
+
     # Plot Mean of all sports
     for i in range(len(events_name)):
         plt.scatter(years, mean_event_array_m[:,i], label="Men")
@@ -190,12 +193,3 @@ if model == "mean_variance":
         plt.legend()
         plt.savefig(events_name[i])
         plt.show()
-
-    # # Plot Variance of all sports
-    # for i in range(len(variance_event_array_m[0])):
-    #     plt.plot(years, variance_event_array_m[:, i], label="Men")
-    #     plt.plot(years, variance_event_array_w[:, i], label="Women")
-    #     plt.title(events_name[i])
-    #     plt.savefig(events_name[i])
-    #     plt.legend()
-    #     plt.show()

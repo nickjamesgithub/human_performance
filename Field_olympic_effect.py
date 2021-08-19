@@ -10,8 +10,6 @@ import re
 path = '/Users/tassjames/Desktop/Olympic_data/olympic_data/field' # use your path
 all_files = glob.glob(path + "/*.csv")
 
-model = "l1_best" #l1_best, mean_variance
-
 li = []
 li_specialised = []
 for filename in all_files:
