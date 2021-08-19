@@ -43,6 +43,7 @@ events_list_w.sort()
 years = np.linspace(2001,2019,19)
 rmse_list = []
 r2_list = []
+params_list = []
 for g in range(len(genders)):
     for i in range(len(events_list_m)):
         # Slice a particular event
@@ -69,11 +70,17 @@ for g in range(len(genders)):
         # Model 1
         ols1 = LinearRegression(fit_intercept=True)
         ols1.fit(x1, y)
+        int_1 = ols1.intercept_
+        coeffs_1 = ols1.coef_
+        m1_params = [int_1[0], coeffs_1[0][0]]
         y_pred_1 = ols1.predict(x1)
 
         # Model 2
         ols2 = LinearRegression(fit_intercept=True)
         ols2.fit(combined, y)
+        int_2 = ols2.intercept_
+        coeffs_2 = ols2.coef_
+        m2_params = [int_2[0], coeffs_2[0][0], coeffs_2[0][1]]
         y_pred_2 = ols2.predict(combined)
 
         # relabel
@@ -96,11 +103,13 @@ for g in range(len(genders)):
         r2_m2 = r2_score(means, y_pred_2)
 
         # Append to lists
-        rmse_list.append([events_list_m[i]+"_"+gender_labels[g], rmse_m1, rmse_m2])
-        r2_list.append([events_list_m[i]+"_"+gender_labels[g], r2_m1, r2_m2])
+        rmse_list.append([events_list_m[i] + "_" + gender_labels[g], rmse_m1, rmse_m2])
+        r2_list.append([events_list_m[i] + "_" + gender_labels[g], r2_m1, r2_m2])
+        params_list.append([events_list_m[i] + "_" + gender_labels[g], m1_params, m2_params])
 
 # Print RMSE and R2
 print(rmse_list)
 print(r2_list)
+print(params_list)
 
 
