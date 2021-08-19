@@ -132,7 +132,6 @@ if model == "l1_best":
 
 if model == "mean_variance":
     frame_sp['Date_Y'] = pd.to_numeric(frame_sp['Date_Y'])
-    block = 1
 
     # Years
     years = np.linspace(2001,2021,21)
