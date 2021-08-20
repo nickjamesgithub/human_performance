@@ -67,7 +67,21 @@ for g in range(len(genders)):
                 country_code = geo_list_year[r][c]
                 country_code_strip = country_code.replace('"', '')
                 slice = coordinates.loc[coordinates['Athlete_Code'] == country_code]
-                lat = slice["Latitude"]
-                long = slice["Longitude"]
+                lat = slice["Latitude"].to_numeric()
+                long = slice["Longitude"].to_numeric()
                 lats_longs.append([lat, long])
                 print(country_code)
+
+        counter = 0
+        while counter < 100 * len(years):
+            location_slice = lats_longs[counter:counter+100]
+            distance_matrix = np.zeros((len(location_slice), len(location_slice)))
+            for a in range(len(location_slice)):
+                for b in range(len(location_slice)):
+                    lat1 = location_slice[a][0]
+                    long1 = np.array(location_slice[a][1]).flatten()
+                    lat2 = np.array(location_slice[b][0]).flatten()
+                    long2 = np.array(location_slice[b][1]).flatten()
+                    h_distance = haversine(long1, lat1, long2, lat2)
+                    block = 1
+            counter += 100
