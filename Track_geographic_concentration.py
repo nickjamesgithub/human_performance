@@ -7,14 +7,15 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 import re
 
-path = '/Users/tassjames/Desktop/Olympic_data/olympic_data/field' # use your path
+make_plots = False
+path = '/Users/tassjames/Desktop/Olympic_data/olympic_data/track' # use your path
 all_files = glob.glob(path + "/*.csv")
 
 li = []
 li_specialised = []
 for filename in all_files:
     df = pd.read_csv(filename, index_col=None, header=0)
-    df_slice = df[["Rank", "Mark", "Nat", "gender", "event", "Date"]]
+    df_slice = df[["Rank", "Mark_seconds", "Nat", "gender", "event", "Date"]]
     li.append(df)
     li_specialised.append(df_slice)
 
@@ -23,7 +24,10 @@ frame = pd.concat(li, axis=0, ignore_index=True)
 frame_sp = pd.concat(li_specialised, axis=0, ignore_index=True)
 
 # Change date format to just year %YYYY
-frame_sp['Date'] = frame_sp['Date'].astype(str).str.extract('(\d{4})').astype(int)
+frame_sp['Date_Y'] = frame_sp['Date'].str[-2:]
+frame_sp['Date_Y'] = str("20") + frame_sp['Date'].str[-2:]
+frame_sp['Date_Y'] = pd.to_numeric(frame_sp['Date_Y'])
+frame_sp['Mark_seconds'] = pd.to_numeric(frame_sp['Mark_seconds'], errors='coerce')
 
 # Slice male and female performance
 men_best_performance = frame_sp[(frame_sp['gender'] == "men")]
@@ -34,7 +38,6 @@ gender_labels = ["men", "women"]
 # Get event lists
 events_list_m = men_best_performance["event"].unique()
 events_list_w = women_best_performance["event"].unique()
-# events_list = ['discus', 'high jump', 'shot put', 'triple jump', 'pole vault', 'long jump', 'javelin', 'hammer throw']
 events_list_m.sort()
 events_list_w.sort()
 
@@ -54,7 +57,7 @@ for g in range(len(genders)):
         # Mean/event/year - men
         geo_list_year = [] # Average Male distance
         for j in range(len(years)):
-            geo_country_event = event.loc[(event['Date'] == years[j]), 'Nat']
+            geo_country_event = event.loc[(event['Date_Y'] == years[j]), 'Nat']
             # geo_country_event_m_s = geo_country_event_m.str.replace('"', '')
             geo_list_year.append(np.array(geo_country_event))
 
@@ -99,6 +102,11 @@ for g in range(len(genders)):
                     distance_matrix[a,b] = h_distance
                 counter += 1
 
+            if make_plots:
+                # Plot distance matrix
+                plt.matshow(distance_matrix)
+                plt.show()
+
             # relabel
             label = re.sub('[!@#$\/]', '', events_list_m[i])
 
@@ -118,8 +126,8 @@ for g in range(len(genders)):
 # Print all event labels
 print(event_labels)
 
-event_names = ["High jump M", "Long jump M", "Pole vault M", "Triple jump M", "Discus M", "Hammer throw M", "Javelin M", "Shot put M",
-               "High jump W", "Long jump W", "Pole vault W", "Triple jump W", "Discus W", "Hammer throw W", "Javelin W", "Shot put W"]
+event_names = ["M 10k", "M 1500m", "M 3k", "M 5k", "M 800m", "M 100m", "M 200m", "M 400m",
+                            "W 10k", "W 1500m", "W 3k", "W 5k", "W 800m", "W 100m", "W 200m", "W 400m"]
 
 # Loop over sequential norms
 total_conc_vector = []
@@ -128,14 +136,15 @@ for i in range(len(geographic_concentration_norms)):
     total_concentration = np.sum(geographic_concentration_norms[i])
     total_conc_vector.append([total_concentration, title])
     plt.plot(geographic_concentration_norms[i], label=title)
-plt.title("Field geographic concentration")
+plt.title("Track geographic concentration")
 plt.legend()
-plt.savefig("Field_geographic_concentration")
+plt.savefig("Track_geographic_concentration")
 plt.show()
 
 # Make it an array Concentration
 concentration_scores = np.array(total_conc_vector)
 concentation_ordered = concentration_scores[concentration_scores[:, 0].argsort()]
 print(concentation_ordered)
+
 
 

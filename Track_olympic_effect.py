@@ -37,7 +37,7 @@ gender_labels = ["men", "women"]
 # Get event lists
 events_list_m = men_best_performance["event"].unique()
 events_list_w = women_best_performance["event"].unique()
-# events_list = ['discus', 'high jump', 'shot put', 'triple jump', 'pole vault', 'long jump', 'javelin', 'hammer throw']
+
 events_list_m.sort()
 events_list_w.sort()
 
