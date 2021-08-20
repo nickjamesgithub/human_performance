@@ -24,7 +24,7 @@ frame_sp = pd.concat(li_specialised, axis=0, ignore_index=True)
 # Change date format to just year %YYYY
 frame_sp['Date'] = frame_sp['Date'].astype(str).str.extract('(\d{4})').astype(int)
 years = np.linspace(2001,2021,21)
-years = (years).astype("int")
+years = years.astype("int")
 
 if model == "l1_best":
     # Grab best performance of each year
@@ -53,11 +53,6 @@ if model == "l1_best":
             means_i.append(mean_year_event_i)
         norm_mark_i = means_i/np.sum(np.abs(means_i))
         normalized_trajectories.append(norm_mark_i)
-
-    # Plot normalized trajectories
-    for i in range(len(normalized_trajectories)):
-        plt.plot(normalized_trajectories[i])
-    plt.show()
 
     # Loop over all events, get time series L^1 normalize and determine distance trajectory
     male_distance_matrix = np.zeros((len(events_list_m),len(events_list_m)))
@@ -129,6 +124,10 @@ if model == "l1_best":
     aff_male = 1 - male_distance_matrix/np.max(male_distance_matrix)
     aff_female = 1 - female_distance_matrix/np.max(female_distance_matrix)
     field_consistency = np.abs(aff_male - aff_female)
+
+    # Plot of consistency
+    plt.matshow(field_consistency)
+    plt.show()
 
     # Compute consistency scores for each sport
     anomaly_scores = []

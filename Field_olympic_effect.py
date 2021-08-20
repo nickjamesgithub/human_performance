@@ -34,8 +34,8 @@ gender_labels = ["men", "women"]
 events_list_m = men_best_performance["event"].unique()
 events_list_w = women_best_performance["event"].unique()
 # events_list = ['discus', 'high jump', 'shot put', 'triple jump', 'pole vault', 'long jump', 'javelin', 'hammer throw']
-events_list_m.sort()
-events_list_w.sort()
+events_list_m = np.sort(events_list_m)
+events_list_w = np.sort(events_list_w)
 
 # Loop over years of analysis
 years = np.linspace(2001,2019,19)
@@ -52,12 +52,6 @@ for g in range(len(genders)):
         for j in range(len(years)):
             mean_year_event = event_i.loc[(event_i['Date'] == years[j]), 'Mark'].mean()
             means.append(mean_year_event)
-
-        # # Remove Years 2020 and 2021
-        # index_2020 = event_i[(event_i['Date'] == 2020)].index
-        # index_2021 = event_i[(event_i['Date'] == 2021)].index
-        # # Delete these row indexes from dataFrame
-        # event_i_2019 = event_i.drop([index_2020[0], index_2021[0]])
 
         # Slice response variable and two predictors
         y = np.array(means).reshape(-1,1)

@@ -24,14 +24,18 @@ frame_sp['Date_Y'] = frame_sp['Date'].str[-2:]
 frame_sp['Date_Y'] = str("20") + frame_sp['Date'].str[-2:]
 frame_sp['Mark_seconds'] = pd.to_numeric(frame_sp['Mark_seconds'], errors='coerce')
 
+frame_sp['Date_Y'] = pd.to_numeric(frame_sp['Date_Y'])
+years = np.linspace(2001,2021,21)
+years = years.astype("int")
+
 model = "l1_best" # l1_best, mean_variance
 
 if model == "l1_best":
     # Grab best performance of each year
     # selecting best male performances
     best_performance = frame_sp[(frame_sp['Rank'] == 1)]
-    men_best_performance = frame_sp[(frame_sp['Rank'] == 1) & (frame_sp['gender'] == "men")]
-    women_best_performance = frame_sp[(frame_sp['Rank'] == 1) & (frame_sp['gender'] == "women")]
+    men_best_performance = frame_sp[(frame_sp['gender'] == "men")]
+    women_best_performance = frame_sp[(frame_sp['gender'] == "women")]
 
     # Get event lists
     events_list_m = men_best_performance["event"].unique()
@@ -44,15 +48,13 @@ if model == "l1_best":
     for i in range(len(events_list_m)):
         # Compute L^1 norm of event i
         event_i = men_best_performance[(men_best_performance["event"] == events_list_m[i])]
-        event_i.drop_duplicates(subset=['Date_Y'], keep='first', inplace=True)
-        mark_i = np.array(event_i["Mark_seconds"])
-        norm_mark_i = mark_i/np.sum(np.abs(mark_i))
+        # Mean/event/year - men
+        means_i = []  # Average Male distance
+        for k in range(len(years)):
+            mean_year_event = event_i.loc[(event_i['Date_Y'] == years[k]), 'Mark_seconds'].mean()
+            means_i.append(mean_year_event)
+        norm_mark_i = means_i / np.sum(np.abs(means_i))
         normalized_trajectories.append(norm_mark_i)
-
-    # Plot normalized trajectories
-    for i in range(len(normalized_trajectories)):
-        plt.plot(normalized_trajectories[i])
-    plt.show()
 
     # Loop over all events, get time series L^1 normalize and determine distance trajectory
     male_distance_matrix = np.zeros((len(events_list_m),len(events_list_m)))
@@ -61,17 +63,20 @@ if model == "l1_best":
         for j in range(len(events_list_m)):
             # Compute L^1 norm of event i
             event_i = men_best_performance[(men_best_performance["event"] == events_list_m[i])]
-            event_i.drop_duplicates(subset=['Date_Y'], keep='first', inplace=True)
-            mark_i = np.array(event_i["Mark_seconds"])
-            norm_mark_i = mark_i/np.sum(np.abs(mark_i))
+            means_i = []  # Average Male distance
+            for k in range(len(years)):
+                mean_year_event = event_i.loc[(event_i['Date_Y'] == years[k]), 'Mark_seconds'].mean()
+                means_i.append(mean_year_event)
+            norm_mark_i = means_i / np.sum(np.abs(means_i))
+            normalized_trajectories.append(norm_mark_i)
 
             # Compute L^1 norm of event j
             event_j = men_best_performance[(men_best_performance["event"] == events_list_m[j])]
-            event_j.drop_duplicates(subset=['Date_Y'], keep='first', inplace=True)
-            mark_j = np.array(event_j["Mark_seconds"])
-            norm_mark_j = mark_j / np.sum(np.abs(mark_j))
-            print(event_j)
-            print(len(mark_j))
+            means_j = []  # Average i distance
+            for k in range(len(years)):
+                mean_year_event_j = event_j.loc[(event_j['Date_Y'] == years[k]), 'Mark_seconds'].mean()
+                means_j.append(mean_year_event_j)
+            norm_mark_j = means_j / np.sum(np.abs(means_j))
 
             # Compute distance between vectors
             difference = np.sum(np.abs(norm_mark_i - norm_mark_j))
@@ -88,17 +93,20 @@ if model == "l1_best":
         for j in range(len(events_list_w)):
             # Compute L^1 norm of event i
             event_i = women_best_performance[(women_best_performance["event"] == events_list_w[i])]
-            event_i.drop_duplicates(subset=['Date_Y'], keep='first', inplace=True)
-            mark_i = np.array(event_i["Mark_seconds"])
-            norm_mark_i = mark_i/np.sum(np.abs(mark_i))
+            means_i = []  # Average i distance
+            for k in range(len(years)):
+                mean_year_event_i = event_i.loc[(event_i['Date_Y'] == years[k]), 'Mark_seconds'].mean()
+                means_i.append(mean_year_event_i)
+            norm_mark_i = means_i / np.sum(np.abs(means_i))
+            normalized_trajectories.append(norm_mark_i)
 
             # Compute L^1 norm of event j
             event_j = women_best_performance[(women_best_performance["event"] == events_list_w[j])]
-            event_j.drop_duplicates(subset=['Date_Y'], keep='first', inplace=True)
-            mark_j = np.array(event_j["Mark_seconds"])
-            norm_mark_j = mark_j / np.sum(np.abs(mark_j))
-            print(event_j)
-            print(len(mark_j))
+            means_j = []  # Average i distance
+            for k in range(len(years)):
+                mean_year_event_j = event_j.loc[(event_j['Date_Y'] == years[k]), 'Mark_seconds'].mean()
+                means_j.append(mean_year_event_j)
+            norm_mark_j = means_j / np.sum(np.abs(means_j))
 
             # Compute distance between vectors
             difference = np.sum(np.abs(norm_mark_i - norm_mark_j))
@@ -117,6 +125,10 @@ if model == "l1_best":
     aff_male = 1 - male_distance_matrix/np.max(male_distance_matrix)
     aff_female = 1 - female_distance_matrix/np.max(female_distance_matrix)
     field_consistency = np.abs(aff_male - aff_female)
+
+    # Plot of consistency
+    plt.matshow(field_consistency)
+    plt.show()
 
     # Compute consistency scores for each sport
     anomaly_scores = []
