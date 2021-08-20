@@ -41,35 +41,35 @@ events_list_w.sort()
 # Loop over years of analysis
 years = np.linspace(2001,2021,21)
 direction_vector_list = []
-for g in range(len(genders)):
-    for i in range(len(events_list_m)):
-        # Slice a particular event
-        event_m = genders[0][(genders[0]["event"] == events_list_m[i])]
-        event_f = genders[1][(genders[1]["event"] == events_list_w[i])]
 
-        # Mean/event/year - men
-        means_m = [] # Average Male distance
-        for j in range(len(years)):
-            mean_year_event = event_m.loc[(event_m['Date'] == years[j]), 'Mark'].mean()
-            means_m.append(mean_year_event)
+for i in range(len(events_list_m)):
+    # Slice a particular event
+    event_m = genders[0][(genders[0]["event"] == events_list_m[i])]
+    event_f = genders[1][(genders[1]["event"] == events_list_w[i])]
 
-        # Compute male returns
-        returns_m = np.diff(means_m)
+    # Mean/event/year - men
+    means_m = [] # Average Male distance
+    for j in range(len(years)):
+        mean_year_event = event_m.loc[(event_m['Date'] == years[j]), 'Mark'].mean()
+        means_m.append(mean_year_event)
 
-        # Mean/event/year - men
-        means_f = [] # Average female distance
-        for j in range(len(years)):
-            mean_year_event = event_f.loc[(event_f['Date'] == years[j]), 'Mark'].mean()
-            means_f.append(mean_year_event)
+    # Compute male returns
+    returns_m = np.diff(means_m)
 
-        # Compute male returns
-        returns_f = np.diff(means_f)
+    # Mean/event/year - men
+    means_f = [] # Average female distance
+    for j in range(len(years)):
+        mean_year_event = event_f.loc[(event_f['Date'] == years[j]), 'Mark'].mean()
+        means_f.append(mean_year_event)
 
-        # Compute direction vector
-        direction_vector = np.sum(returns_m*returns_f)/(np.linalg.norm(returns_m)*np.linalg.norm(returns_f))
+    # Compute male returns
+    returns_f = np.diff(means_f)
 
-        # Append to list
-        direction_vector_list.append([events_list_m[i], direction_vector])
+    # Compute direction vector
+    direction_vector = np.sum(returns_m*returns_f)/(np.linalg.norm(returns_m)*np.linalg.norm(returns_f))
+
+    # Append to list
+    direction_vector_list.append([events_list_m[i], direction_vector])
 
 # Print out direction vector list
 print(direction_vector_list)
