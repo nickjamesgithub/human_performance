@@ -127,13 +127,13 @@ for g in range(len(genders)):
 print(event_labels)
 
 event_names = ["M 10k", "M 1500m", "M 3k", "M 5k", "M 800m", "M 100m", "M 200m", "M 400m",
-                            "W 10k", "W 1500m", "W 3k", "W 5k", "W 800m", "W 100m", "W 200m", "W 400m"]
+               "W 10k", "W 1500m", "W 3k", "W 5k", "W 800m", "W 100m", "W 200m", "W 400m"]
 
 # Loop over sequential norms
 total_conc_vector = []
 for i in range(len(geographic_concentration_norms)):
     title = event_names[i]
-    total_concentration = np.sum(geographic_concentration_norms[i])
+    total_concentration = np.sum(geographic_concentration_norms[i]) * 10**-7
     total_conc_vector.append([total_concentration, title])
     plt.plot(geographic_concentration_norms[i], label=title)
 plt.title("Track geographic concentration")
@@ -145,6 +145,7 @@ plt.show()
 concentration_scores = np.array(total_conc_vector)
 concentation_ordered = concentration_scores[concentration_scores[:, 0].argsort()]
 print(concentation_ordered)
+
 
 
 

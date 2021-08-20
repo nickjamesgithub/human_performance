@@ -7,7 +7,7 @@ import re
 path = '/Users/tassjames/Desktop/Olympic_data/olympic_data/field' # use your path
 all_files = glob.glob(path + "/*.csv")
 
-model = "mean_variance" #l1_best, mean_variance
+model = "l1_best" #l1_best, mean_variance
 
 li = []
 li_specialised = []
@@ -23,6 +23,8 @@ frame_sp = pd.concat(li_specialised, axis=0, ignore_index=True)
 
 # Change date format to just year %YYYY
 frame_sp['Date'] = frame_sp['Date'].astype(str).str.extract('(\d{4})').astype(int)
+years = np.linspace(2001,2021,21)
+years = (years).astype("int")
 
 if model == "l1_best":
     # Grab best performance of each year
@@ -34,7 +36,9 @@ if model == "l1_best":
     # Get event lists
     events_list_m = men_best_performance["event"].unique()
     events_list_w = women_best_performance["event"].unique()
-    events_list = ['discus', 'high jump', 'shot put', 'triple jump', 'pole vault', 'long jump', 'javelin', 'hammer throw']
+    # # Sort events list
+    events_list_m = np.sort(events_list_m)
+    events_list_w = np.sort(events_list_w)
 
     # Drop duplicates of best performance
     normalized_trajectories = []
@@ -43,7 +47,11 @@ if model == "l1_best":
         event_i = men_best_performance[(men_best_performance["event"] == events_list_m[i])]
         event_i.drop_duplicates(subset=['Date'], keep='first', inplace=True)
         mark_i = np.array(event_i["Mark"])
-        norm_mark_i = mark_i/np.sum(np.abs(mark_i))
+        means_i = []  # Average i distance
+        for k in range(len(years)):
+            mean_year_event_i = event_i.loc[(event_i['Date'] == years[k]), 'Mark'].mean()
+            means_i.append(mean_year_event_i)
+        norm_mark_i = means_i/np.sum(np.abs(means_i))
         normalized_trajectories.append(norm_mark_i)
 
     # Plot normalized trajectories
@@ -58,17 +66,20 @@ if model == "l1_best":
         for j in range(len(events_list_m)):
             # Compute L^1 norm of event i
             event_i = men_best_performance[(men_best_performance["event"] == events_list_m[i])]
-            event_i.drop_duplicates(subset=['Date'], keep='first', inplace=True)
-            mark_i = np.array(event_i["Mark"])
-            norm_mark_i = mark_i/np.sum(np.abs(mark_i))
+            means_i = []  # Average i distance
+            for k in range(len(years)):
+                mean_year_event_i = event_i.loc[(event_i['Date'] == years[k]), 'Mark'].mean()
+                means_i.append(mean_year_event_i)
+            norm_mark_i = means_i / np.sum(np.abs(means_i))
+            normalized_trajectories.append(norm_mark_i)
 
             # Compute L^1 norm of event j
             event_j = men_best_performance[(men_best_performance["event"] == events_list_m[j])]
-            event_j.drop_duplicates(subset=['Date'], keep='first', inplace=True)
-            mark_j = np.array(event_j["Mark"])
-            norm_mark_j = mark_j / np.sum(np.abs(mark_j))
-            print(event_j)
-            print(len(mark_j))
+            means_j = []  # Average i distance
+            for k in range(len(years)):
+                mean_year_event_j = event_j.loc[(event_j['Date'] == years[k]), 'Mark'].mean()
+                means_j.append(mean_year_event_j)
+            norm_mark_j = means_j / np.sum(np.abs(means_j))
 
             # Compute distance between vectors
             difference = np.sum(np.abs(norm_mark_i - norm_mark_j))
@@ -85,22 +96,26 @@ if model == "l1_best":
         for j in range(len(events_list_w)):
             # Compute L^1 norm of event i
             event_i = women_best_performance[(women_best_performance["event"] == events_list_w[i])]
-            event_i.drop_duplicates(subset=['Date'], keep='first', inplace=True)
-            mark_i = np.array(event_i["Mark"])
-            norm_mark_i = mark_i/np.sum(np.abs(mark_i))
+            means_i = []  # Average i distance
+            for k in range(len(years)):
+                mean_year_event_i = event_i.loc[(event_i['Date'] == years[k]), 'Mark'].mean()
+                means_i.append(mean_year_event_i)
+            norm_mark_i = means_i / np.sum(np.abs(means_i))
+            normalized_trajectories.append(norm_mark_i)
 
             # Compute L^1 norm of event j
             event_j = women_best_performance[(women_best_performance["event"] == events_list_w[j])]
-            event_j.drop_duplicates(subset=['Date'], keep='first', inplace=True)
-            mark_j = np.array(event_j["Mark"])
-            norm_mark_j = mark_j / np.sum(np.abs(mark_j))
-            print(event_j)
-            print(len(mark_j))
+            means_j = []  # Average i distance
+            for k in range(len(years)):
+                mean_year_event_j = event_j.loc[(event_j['Date'] == years[k]), 'Mark'].mean()
+                means_j.append(mean_year_event_j)
+            norm_mark_j = means_j / np.sum(np.abs(means_j))
 
             # Compute distance between vectors
             difference = np.sum(np.abs(norm_mark_i - norm_mark_j))
             female_distance_matrix[i,j] = np.sum(np.abs(norm_mark_i - norm_mark_j))
 
+    # Female distance matrix
     plt.matshow(female_distance_matrix)
     plt.show()
 
@@ -118,78 +133,12 @@ if model == "l1_best":
     # Compute consistency scores for each sport
     anomaly_scores = []
     for i in range(len(field_consistency)):
+        # relabel
+        label = re.sub('[!@#$\/]', '', events_list_m[i])
         anomaly_i = np.sum(field_consistency[i,:])
-        anomaly_scores.append([anomaly_i, events_list[i]])
+        anomaly_scores.append([anomaly_i, label])
 
     # Make it an array Anomaly scores
     anomaly_scores = np.array(anomaly_scores)
     anomaly_ordered = anomaly_scores[anomaly_scores[:, 0].argsort()]
     print(anomaly_ordered)
-
-if model == "mean_variance":
-    # Years
-    years = np.linspace(2001,2021,21)
-    # Mean/Variance event year
-    mean_event_year_men = []
-    variance_event_year_men = []
-    mean_event_year_women = []
-    variance_event_year_women = []
-
-    for i in range(len(years)):
-        men_year = frame_sp[(frame_sp['gender'] == "men") & (frame_sp['Date'] == years[i])]
-        women_year = frame_sp[(frame_sp['gender'] == "women") & (frame_sp['Date'] == years[i])]
-        events_list = men_year["event"].unique()
-        events_name = ['discus', 'high jump', 'shot put', 'triple jump', 'pole vault', 'long jump', 'javelin',
-                       'hammer throw']
-        events_name.sort()
-        # Mean/Variance List
-        mean_list_m = []
-        variance_list_m = []
-        mean_list_w = []
-        variance_list_w = []
-        for j in range(len(events_list)): # For each year, append the variance of performance in each sport
-            men_event = men_year[(men_year['event'] == events_list[j])]
-            mark_m = men_event["Mark"]
-            # Compute mean and variance
-            marks_mean_m = np.mean(mark_m)
-            marks_variance_m = np.var(mark_m)
-
-            # Compute mean and variance lists
-            mean_list_m.append(marks_mean_m)
-            variance_list_m.append(marks_variance_m)
-
-            women_event = women_year[(women_year['event'] == events_list[j])]
-            mark_w = women_event["Mark"]
-            # Compute mean and variance
-            marks_mean_w = np.mean(mark_w)
-            marks_variance_w = np.var(mark_w)
-
-            # Compute mean and variance lists
-            mean_list_w.append(marks_mean_w)
-            variance_list_w.append(marks_variance_w)
-
-        # Mean event year men
-        mean_event_year_men.append(mean_list_m)
-        variance_event_year_men.append(variance_list_m)
-
-        # Mean event year women
-        mean_event_year_women.append(mean_list_w)
-        variance_event_year_women.append(variance_list_w)
-
-    # Make arrays
-    variance_event_array_m = np.array(variance_event_year_men)
-    mean_event_array_m = np.array(mean_event_year_men)
-    variance_event_array_w = np.array(variance_event_year_women)
-    mean_event_array_w = np.array(mean_event_year_women)
-
-    # relabel
-    label = re.sub('[!@#$\/]', '', events_list_m[i])
-
-    # Plot Mean of all sports
-    for i in range(len(events_name)):
-        plt.scatter(years, mean_event_array_m[:,i], label="Men")
-        plt.scatter(years, mean_event_array_w[:, i], label="Women")
-        plt.title(events_name[i])
-        plt.legend()
-        plt.savefig(events_name[i])
-        plt.show()

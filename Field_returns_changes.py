@@ -56,7 +56,7 @@ for i in range(len(events_list_m)):
     # Compute male returns
     returns_m = np.diff(means_m)
 
-    # Mean/event/year - men
+    # Mean/event/year - women
     means_f = [] # Average female distance
     for j in range(len(years)):
         mean_year_event = event_f.loc[(event_f['Date'] == years[j]), 'Mark'].mean()

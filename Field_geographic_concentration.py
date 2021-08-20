@@ -6,6 +6,7 @@ from Utilities import generate_olympic_data, dendrogram_plot_labels, haversine
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 import re
+from scipy.stats import wasserstein_distance
 
 path = '/Users/tassjames/Desktop/Olympic_data/olympic_data/field' # use your path
 all_files = glob.glob(path + "/*.csv")
@@ -59,12 +60,14 @@ for g in range(len(genders)):
             geo_list_year.append(np.array(geo_country_event))
 
         # Loop over each year and get lat and long from each country
+        nationalities = []
         lats_longs = []
         country_codes_list = []
         for r in range(len(geo_list_year)):
             for c in range(len(geo_list_year[0])):
                 country_code = geo_list_year[r][c]
                 country_code_strip = country_code.replace('"', '')
+                nationalities.append(country_code)
                 slice = coordinates.loc[coordinates['Athlete_Code'] == country_code]
                 lat = np.array(slice["Latitude_n"])
                 long = np.array(slice["Longitude_n"])
@@ -84,7 +87,7 @@ for g in range(len(genders)):
                     try:
                         lat1 = location_slice[a][0][0]
                         long1 = location_slice[a][1][0]
-                    except:
+                    except: # If distance is not found use central latitude/longitude
                         lat1 = 40.52
                         long1 = 34.34
                         missingness += 1
@@ -92,7 +95,7 @@ for g in range(len(genders)):
                     try:
                         lat2 = location_slice[b][0][0]
                         long2 = location_slice[b][1][0]
-                    except:
+                    except: # If distance is not found use central latitude/longitude
                         lat2 = 40.52
                         long2 = 34.34
                     h_distance = haversine(long1, lat1, long2, lat2)
@@ -125,7 +128,7 @@ event_names = ["High jump M", "Long jump M", "Pole vault M", "Triple jump M", "D
 total_conc_vector = []
 for i in range(len(geographic_concentration_norms)):
     title = event_names[i]
-    total_concentration = np.sum(geographic_concentration_norms[i])
+    total_concentration = np.sum(geographic_concentration_norms[i]) * 10**-7
     total_conc_vector.append([total_concentration, title])
     plt.plot(geographic_concentration_norms[i], label=title)
 plt.title("Field geographic concentration")
