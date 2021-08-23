@@ -8,6 +8,9 @@ from sklearn.metrics import mean_squared_error, r2_score
 import re
 from Utilities import generate_olympic_data
 
+# Top 10/100
+top = 100 # 10/100
+
 path = '/Users/tassjames/Desktop/Olympic_data/olympic_data/track' # use your path
 all_files = glob.glob(path + "/*.csv")
 
@@ -57,8 +60,13 @@ for g in range(len(genders)):
         # Mean/event/year
         means = []
         for j in range(len(years)):
-            mean_year_event = event_i.loc[(event_i['Date_Y'] == years[j]), 'Mark_seconds'].mean()
-            means.append(mean_year_event)
+            if top == 100:
+                mean_year_event = event_i.loc[(event_i['Date_Y'] == years[j]), 'Mark_seconds'].mean()
+                means.append(mean_year_event)
+            if top == 10:
+                year_event_top10 = event_i.loc[(event_i['Date_Y'] == years[j]), 'Mark_seconds'][:10]
+                mean_year_event = year_event_top10.mean()
+                means.append(mean_year_event)
 
         # # Remove Years 2020 and 2021
         # index_2020 = event_i[(event_i['Date'] == 2020)].index
@@ -96,9 +104,9 @@ for g in range(len(genders)):
         plt.plot(x1, y_pred_1, label="Model 1", color="red")
         plt.plot(x1, y_pred_2, label="Model 2", color="blue")
         plt.scatter(x1, y, color="black", alpha=0.25)
-        plt.title(events_list_m[i]+"_"+gender_labels[g])
+        plt.title(events_list_m[i]+"_"+gender_labels[g]+"_"+str(top))
         plt.legend()
-        plt.savefig(label+gender_labels[g])
+        plt.savefig(label+gender_labels[g]+"_"+str(top))
         plt.show()
 
         # Compute RMSE and R2
