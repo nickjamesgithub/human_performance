@@ -7,7 +7,6 @@ from Utilities import generate_olympic_data, dendrogram_plot_labels
 from sklearn.metrics import mean_squared_error, r2_score
 import re
 
-
 path = '/Users/tassjames/Desktop/Olympic_data/olympic_data/field' # use your path
 all_files = glob.glob(path + "/*.csv")
 
