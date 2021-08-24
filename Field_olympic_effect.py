@@ -6,6 +6,7 @@ from Utilities import generate_olympic_data
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 import re
+import statsmodels.api as sm
 
 # Top 10/100
 top = 100 # 10/100
@@ -64,8 +65,10 @@ for g in range(len(genders)):
         # Slice response variable and two predictors
         y = np.array(means).reshape(-1,1)
         x1 = np.reshape(np.linspace(2001,2019,19), (len(years),1))
+        x1_ones = sm.tools.tools.add_constant(x1)
         x2 = np.reshape(generate_olympic_data(x1), (19,1))
         combined = np.concatenate((x1,x2),axis=1)
+        combined_ones = sm.tools.tools.add_constant(combined)
 
         # Model 1
         ols1 = LinearRegression(fit_intercept=True)
@@ -75,6 +78,15 @@ for g in range(len(genders)):
         m1_params = [int_1[0], coeffs_1[0][0]]
         y_pred_1 = ols1.predict(x1)
 
+        # Model 1 statsmodels
+        model1 = sm.OLS(y, x1_ones)
+        results1 = model1.fit()
+        print(results1.summary())
+        print("results parameters", results1.params)
+        print("AIC", results1.aic)
+        print("BIC", results1.bic)
+        print("Adjusted R2", results1.rsquared_adj)
+
         # Model 2
         ols2 = LinearRegression(fit_intercept=True)
         ols2.fit(combined, y)
@@ -83,8 +95,25 @@ for g in range(len(genders)):
         m2_params = [int_2[0], coeffs_2[0][0], coeffs_2[0][1]]
         y_pred_2 = ols2.predict(combined)
 
+        # Model 2 statsmodels
+        model2 = sm.OLS(y, combined_ones)
+        results2 = model2.fit()
+        print(results2.summary())
+        print("results parameters", results2.params)
+        print("AIC", results2.aic)
+        print("BIC", results2.bic)
+        print("Adjusted R2", results2.rsquared_adj)
+
         # relabel
         label = re.sub('[!@#$\/]', '', events_list_m[i])
+
+        # Model 1 and Model 2 fit (statsmodels)
+        plt.plot(x1, results1.fittedvalues, label="model 1")
+        plt.plot(x1, results2.fittedvalues, label="model 2")
+        plt.scatter(x1, y, label="data")
+        plt.legend()
+        plt.savefig(label + gender_labels[g] + "_" + str(top)+"_SM")
+        plt.show()
 
         # plot of regression
         plt.scatter(x1, means)

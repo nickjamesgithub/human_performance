@@ -3,9 +3,10 @@ import glob
 import numpy as np
 import matplotlib.pyplot as plt
 from Utilities import generate_olympic_data, dendrogram_plot_labels
-from sklearn.linear_model import LinearRegression
+# from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 import re
+
 
 path = '/Users/tassjames/Desktop/Olympic_data/olympic_data/field' # use your path
 all_files = glob.glob(path + "/*.csv")
