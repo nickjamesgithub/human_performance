@@ -118,7 +118,7 @@ for g in range(len(genders)):
         # Append to lists
         rmse_list.append([events_list_m[i]+"_"+gender_labels[g], rmse_m1, rmse_m2])
         r2_list.append([events_list_m[i]+"_"+gender_labels[g], r2_m1, r2_m2])
-        params_list.append([m1_params, m2_params])
+        params_list.append([events_list_m[i]+"_"+gender_labels[g], m1_params, m2_params])
 
 # Print RMSE and R2
 print(rmse_list)

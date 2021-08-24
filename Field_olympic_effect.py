@@ -8,7 +8,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 import re
 
 # Top 10/100
-top = 10 # 10/100
+top = 100 # 10/100
 
 path = '/Users/tassjames/Desktop/Olympic_data/olympic_data/field' # use your path
 all_files = glob.glob(path + "/*.csv")

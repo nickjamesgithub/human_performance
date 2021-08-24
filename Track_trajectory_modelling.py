@@ -82,10 +82,6 @@ if model == "l1_best":
             difference = np.sum(np.abs(norm_mark_i - norm_mark_j))
             male_distance_matrix[i,j] = np.sum(np.abs(norm_mark_i - norm_mark_j))
 
-    # Plot Male distance matrix
-    plt.matshow(male_distance_matrix)
-    plt.show()
-
     # Loop over all events, get time series L^1 normalize and determine distance trajectory
     female_distance_matrix = np.zeros((len(events_list_w),len(events_list_w)))
     normalized_trajectories = []
@@ -112,9 +108,6 @@ if model == "l1_best":
             difference = np.sum(np.abs(norm_mark_i - norm_mark_j))
             female_distance_matrix[i,j] = np.sum(np.abs(norm_mark_i - norm_mark_j))
 
-    plt.matshow(female_distance_matrix)
-    plt.show()
-
     # Total (normalized) norm for men/women
     female_norm = 1/len(female_distance_matrix)**2 * np.sum(np.abs(female_distance_matrix))
     male_norm = 1/len(male_distance_matrix)**2 * np.sum(np.abs(male_distance_matrix))
@@ -126,8 +119,22 @@ if model == "l1_best":
     aff_female = 1 - female_distance_matrix/np.max(female_distance_matrix)
     field_consistency = np.abs(aff_male - aff_female)
 
+    # Plot Male distance matrix
+    plt.matshow(aff_male)
+    plt.colorbar()
+    plt.title("Male_distance_matrix")
+    plt.show()
+
+    # Plot female distance matrix
+    plt.matshow(aff_female)
+    plt.colorbar()
+    plt.title("Female_distance_matrix")
+    plt.show()
+
     # Plot of consistency
     plt.matshow(field_consistency)
+    plt.colorbar()
+    plt.title("Consistency_Matrix")
     plt.show()
 
     # Compute consistency scores for each sport

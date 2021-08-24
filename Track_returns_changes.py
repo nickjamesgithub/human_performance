@@ -40,7 +40,7 @@ events_list_m = np.sort(events_list_m)
 events_list_w = np.sort(events_list_w)
 
 # Loop over years of analysis
-years = np.linspace(2001,2021,21)
+years = np.linspace(2001,2019,19)
 years = years.astype("int")
 direction_vector_list = []
 
