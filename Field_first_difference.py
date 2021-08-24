@@ -98,7 +98,7 @@ for i in range(len(events_list_m)):
     # relabel
     label = re.sub('[!@#$\/]', '', events_list_w[i])
 
-    # Men's first difference
+    # Women's first difference
     plt.plot(x1_diff, results_f.fittedvalues, label="model 1")
     plt.scatter(x1_diff, y_m, label="data")
     plt.title("First_difference_"+label+"_women")
