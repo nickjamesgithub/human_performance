@@ -75,8 +75,8 @@ for g in range(len(genders)):
         x1 = np.reshape(np.linspace(2001,2019,19), (len(years),1)) # Linear
         x1_ones = sm.tools.tools.add_constant(x1)
         x2 = np.reshape(generate_olympic_data(x1), (19,1)) # Indicator
-        x3 = np.cos(np.pi / 2 * x1) # Periodic
-        x4 = np.sin(np.pi / 2 * x1) # Periodic
+        x3 = np.cos(np.pi / 2 * x1) # Periodic sine wave
+        x4 = np.sin(np.pi / 2 * x1) # Periodic cos wave
 
         # Combinations of features
         linear_indicator = np.concatenate((x1,x2),axis=1) # linear + indicator
