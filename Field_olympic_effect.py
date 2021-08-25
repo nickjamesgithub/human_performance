@@ -69,14 +69,24 @@ for g in range(len(genders)):
 
         # Slice response variable and two predictors
         y = np.array(means).reshape(-1,1)
-        x1 = np.reshape(np.linspace(2001,2019,19), (len(years),1))
+        x1 = np.reshape(np.linspace(2001,2019,19), (len(years),1)) # Linear
         x1_ones = sm.tools.tools.add_constant(x1)
-        x2 = np.reshape(generate_olympic_data(x1), (19,1))
-        combined = np.concatenate((x1,x2),axis=1)
-        combined_ones = sm.tools.tools.add_constant(combined)
+        x2 = np.reshape(generate_olympic_data(x1), (19,1)) # Indicator
+        x3 = np.cos(np.pi / 2 * x1) # Periodic
+        x4 = np.sin(np.pi / 2 * x1) # Periodic
 
-        # Model 1 statsmodels
-        model1 = sm.OLS(y, x1_ones)
+        # Combinations of features
+        linear_indicator = np.concatenate((x1,x2),axis=1) # linear + indicator
+        linear_periodic = np.concatenate((x1,x3,x4),axis=1) # Linear + periodic
+        linear_indicator_periodic = np.concatenate((x1,x2,x3,x4),axis=1) # Linear + periodic + indicator
+
+        # Add column of ones
+        linear_indicator_ones = sm.tools.tools.add_constant(linear_indicator)
+        linear_periodic_ones = sm.tools.tools.add_constant(linear_periodic)
+        linear_indicator_periodic_ones = sm.tools.tools.add_constant(linear_indicator_periodic)
+
+        # Model 1 statsmodels: linear
+        model1 = sm.OLS(y, x1_ones) # Linear term
         results1 = model1.fit()
         # AIC/BIC/Adjusted R2
         m1_aic = results1.aic
@@ -84,8 +94,8 @@ for g in range(len(genders)):
         m1_r2a = results1.rsquared_adj
         m1_pvals = results1.pvalues
 
-        # Model 2 statsmodels
-        model2 = sm.OLS(y, combined_ones)
+        # Model 2 statsmodels: linear + indicator
+        model2 = sm.OLS(y, linear_indicator_ones) # Linear + indicator
         results2 = model2.fit()
         # AIC/BIC/Adjusted R2
         m2_aic = results2.aic
@@ -93,12 +103,32 @@ for g in range(len(genders)):
         m2_r2a = results2.rsquared_adj
         m2_pvals = results2.pvalues
 
+        # Model 3 statsmodels: linear + periodic
+        model3 = sm.OLS(y, linear_periodic_ones) # linear + periodic
+        results3 = model3.fit()
+        # AIC/BIC/Adjusted R2
+        m3_aic = results3.aic
+        m3_bic = results3.bic
+        m3_r2a = results3.rsquared_adj
+        m3_pvals = results3.pvalues
+
+        # Model 4 statsmodels: linear + periodic
+        model4 = sm.OLS(y, linear_indicator_periodic_ones) # Linear + periodic + indicator
+        results4 = model4.fit()
+        # AIC/BIC/Adjusted R2
+        m4_aic = results4.aic
+        m4_bic = results4.bic
+        m4_r2a = results4.rsquared_adj
+        m4_pvals = results4.pvalues
+
         # relabel
         label = re.sub('[!@#$\/]', '', events_list_m[i])
 
-        # Model 1 and Model 2 fit (statsmodels)
+        # Model 1, Model 2, Model 3, Model 4 fit (statsmodels)
         plt.plot(x1, results1.fittedvalues, label="model 1")
         plt.plot(x1, results2.fittedvalues, label="model 2")
+        plt.plot(x1, results3.fittedvalues, label="model 3")
+        plt.plot(x1, results4.fittedvalues, label="model 4")
         plt.scatter(x1, y, label="data")
         plt.legend()
         plt.title(events_list_m[i]+"_"+gender_labels[g] + "_" + str(top))
@@ -106,10 +136,16 @@ for g in range(len(genders)):
         plt.show()
 
         # Append AIC/BIC/Adjusted R^2/p values to list
-        AIC_list.append([events_list_m[i] + "_" + gender_labels[g], m1_aic, m2_aic])
-        BIC_list.append([events_list_m[i] + "_" + gender_labels[g], m1_bic, m2_bic])
-        r2_list.append([events_list_m[i] + "_" + gender_labels[g], m1_r2a, m2_r2a])
-        pvals_list.append([events_list_m[i] + "_" + gender_labels[g], m1_pvals, m2_pvals])
+        AIC_list.append([events_list_m[i] + "_" + gender_labels[g], m1_aic, m2_aic, m3_aic, m4_aic])
+        BIC_list.append([events_list_m[i] + "_" + gender_labels[g], m1_bic, m2_bic, m3_bic, m4_bic])
+        r2_list.append([events_list_m[i] + "_" + gender_labels[g], m1_r2a, m2_r2a, m3_r2a, m4_r2a])
+        pvals_list.append([events_list_m[i] + "_" + gender_labels[g], m1_pvals, m2_pvals, m3_pvals, m4_pvals])
+
+        # Print results from each model
+        print("Model 1", results1.summary())
+        print("Model 2", results2.summary())
+        print("Model 3",results3.summary())
+        print("Model 4", results4.summary())
 
 # Print RMSE and R2
 print(AIC_list)
