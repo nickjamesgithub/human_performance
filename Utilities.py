@@ -46,6 +46,13 @@ def generate_olympic_data(grid):
             indicator_array.append(0)
     return np.asarray(indicator_array)
 
+def indicator_function(grid):
+    indicator_array = []
+    for i in range(len(grid)):
+        remainder = grid[i] % 4
+        indicator_array.append(remainder)
+    return np.asarray(indicator_array)
+
 def dendrogram_plot_labels(matrix, distance_measure, data_generation, labels):
 
     # Compute and plot dendrogram.

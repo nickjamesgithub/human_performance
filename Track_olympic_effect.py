@@ -75,18 +75,18 @@ for g in range(len(genders)):
         x1 = np.reshape(np.linspace(2001,2019,19), (len(years),1)) # Linear
         x1_ones = sm.tools.tools.add_constant(x1)
         x2 = np.reshape(generate_olympic_data(x1), (19,1)) # Indicator
-        x3 = np.cos(np.pi / 2 * x1) # Periodic sine wave
-        x4 = np.sin(np.pi / 2 * x1) # Periodic cos wave
+        x3 = np.cos(np.pi / 2 * x1) # Periodic cos wave
 
         # Combinations of features
         linear_indicator = np.concatenate((x1,x2),axis=1) # linear + indicator
-        linear_periodic = np.concatenate((x1,x3,x4),axis=1) # Linear + periodic
-        linear_indicator_periodic = np.concatenate((x1,x2,x3,x4),axis=1) # Linear + periodic + indicator
+        linear_periodic = np.concatenate((x1,x3),axis=1) # Linear + periodic
+        linear_indicator_periodic = np.concatenate((x1,x2,x3),axis=1) # Linear + periodic + indicator
 
         # Add column of ones
         linear_indicator_ones = sm.tools.tools.add_constant(linear_indicator)
         linear_periodic_ones = sm.tools.tools.add_constant(linear_periodic)
         linear_indicator_periodic_ones = sm.tools.tools.add_constant(linear_indicator_periodic)
+        periodic_ones = sm.tools.tools.add_constant(x3)
 
         # Model 1 statsmodels: linear
         model1 = sm.OLS(y, x1_ones)  # Linear term
@@ -124,6 +124,15 @@ for g in range(len(genders)):
         m4_r2a = results4.rsquared_adj
         m4_pvals = results4.pvalues
 
+        # Model 5 statsmodels: linear + periodic
+        model5 = sm.OLS(y, periodic_ones)  # Periodic function
+        results5 = model5.fit()
+        # AIC/BIC/Adjusted R2
+        m5_aic = results5.aic
+        m5_bic = results5.bic
+        m5_r2a = results5.rsquared_adj
+        m5_pvals = results5.pvalues
+
         # relabel
         label = re.sub('[!@#$\/]', '', events_list_m[i])
 
@@ -132,6 +141,7 @@ for g in range(len(genders)):
         plt.plot(x1, results2.fittedvalues, label="model 2", alpha=0.4)
         plt.plot(x1, results3.fittedvalues, label="model 3", alpha=0.4)
         plt.plot(x1, results4.fittedvalues, label="model 4", alpha=0.4)
+        plt.plot(x1, results5.fittedvalues, label="model 5", alpha=0.4)
         plt.scatter(x1, y, label="data")
         plt.legend()
         plt.title(events_list_m[i] + "_" + gender_labels[g] + "_" + str(top))
@@ -139,16 +149,17 @@ for g in range(len(genders)):
         plt.show()
 
         # Append AIC/BIC/Adjusted R^2/p values to list
-        AIC_list.append([events_list_m[i] + "_" + gender_labels[g], m1_aic, m2_aic, m3_aic, m4_aic])
-        BIC_list.append([events_list_m[i] + "_" + gender_labels[g], m1_bic, m2_bic, m3_bic, m4_bic])
-        r2_list.append([events_list_m[i] + "_" + gender_labels[g], m1_r2a, m2_r2a, m3_r2a, m4_r2a])
-        pvals_list.append([events_list_m[i] + "_" + gender_labels[g], m1_pvals, m2_pvals, m3_pvals, m4_pvals])
+        AIC_list.append([events_list_m[i] + "_" + gender_labels[g], m1_aic, m2_aic, m3_aic, m4_aic, m5_aic])
+        BIC_list.append([events_list_m[i] + "_" + gender_labels[g], m1_bic, m2_bic, m3_bic, m4_bic, m5_bic])
+        r2_list.append([events_list_m[i] + "_" + gender_labels[g], m1_r2a, m2_r2a, m3_r2a, m4_r2a, m5_r2a])
+        pvals_list.append([events_list_m[i] + "_" + gender_labels[g], m1_pvals, m2_pvals, m3_pvals, m4_pvals, m5_pvals])
 
         # Print results from each model
-        print("Model 1", results1.summary())
-        print("Model 2", results2.summary())
-        print("Model 3", results3.summary())
-        print("Model 4", results4.summary())
+        # print("Model 1", results1.summary())
+        # print("Model 2", results2.summary())
+        # print("Model 3", results3.summary())
+        # print("Model 4", results4.summary())
+        print("Model 5", results5.summary())
 
     # Print RMSE and R2
     print(AIC_list)
