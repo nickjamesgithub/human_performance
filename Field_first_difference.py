@@ -8,6 +8,8 @@ from sklearn.metrics import mean_squared_error, r2_score
 import re
 import statsmodels.api as sm
 
+make_plots = True
+
 path = '/Users/tassjames/Desktop/Olympic_data/olympic_data/field' # use your path
 all_files = glob.glob(path + "/*.csv")
 
@@ -43,6 +45,10 @@ events_list_w = np.sort(events_list_w)
 years = np.linspace(2001,2019,19)
 direction_vector_list = []
 
+# Parameters on men and women
+params_m_list = []
+params_f_list = []
+
 for i in range(len(events_list_m)):
     # Slice a particular event
     event_m = genders[0][(genders[0]["event"] == events_list_m[i])]
@@ -74,17 +80,23 @@ for i in range(len(events_list_m)):
     # Model 1 statsmodels
     model_m = sm.OLS(y_m, x1_ones)
     results_m = model_m.fit()
+    print(results_m.summary())
+
+    # AIC/BIC/Adjusted R2
+    params_m = results_m.params
+    params_m_list.append([events_list_m[i], params_m])
 
     # relabel
     label = re.sub('[!@#$\/]', '', events_list_m[i])
 
-    # Men's first difference
-    plt.plot(x1_diff, results_m.fittedvalues, label="model 1")
-    plt.scatter(x1_diff, y_m, label="data")
-    plt.title("First_difference_"+label+"_men")
-    plt.legend()
-    plt.savefig("First_difference_"+label+"_men")
-    plt.show()
+    if make_plots:
+        # Men's first difference
+        plt.plot(x1_diff, results_m.fittedvalues, label="model 1")
+        plt.scatter(x1_diff, y_m, label="data")
+        plt.title("First_difference_"+label+"_men")
+        plt.legend()
+        plt.savefig("First_difference_"+label+"_men")
+        plt.show()
 
     # Slice response variable and two predictors
     y_f = np.array(returns_f).reshape(-1, 1)
@@ -94,18 +106,30 @@ for i in range(len(events_list_m)):
     # Model 1 statsmodels
     model_f = sm.OLS(y_f, x1_ones)
     results_f = model_f.fit()
+    # AIC/BIC/Adjusted R2
+    params_f = results_f.params
+    params_f_list.append([events_list_w[i], params_f])
 
     # relabel
     label = re.sub('[!@#$\/]', '', events_list_w[i])
 
-    # Women's first difference
-    plt.plot(x1_diff, results_f.fittedvalues, label="model 1")
-    plt.scatter(x1_diff, y_m, label="data")
-    plt.title("First_difference_"+label+"_women")
-    plt.legend()
-    plt.savefig("First_difference_"+label+"_women")
-    plt.show()
+    if make_plots:
+        # Women's first difference
+        plt.plot(x1_diff, results_f.fittedvalues, label="model 1")
+        plt.scatter(x1_diff, y_m, label="data")
+        plt.title("First_difference_"+label+"_women")
+        plt.legend()
+        plt.savefig("First_difference_"+label+"_women")
+        plt.show()
 
-    block = 1
+# Model parameters
+print(params_m_list)
+print(params_f_list)
+
+# Write to dataframe and then desktop
+params_m_df = pd.DataFrame(params_m_list)
+params_m_df.to_csv("/Users/tassjames/Desktop/first_difference_m.csv")
+params_f_df = pd.DataFrame(params_f_list)
+params_f_df.to_csv("/Users/tassjames/Desktop/first_difference_f.csv")
 
 
