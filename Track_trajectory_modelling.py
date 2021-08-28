@@ -4,6 +4,8 @@ import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 
+make_trajectories_run = False
+
 path = '/Users/tassjames/Desktop/Olympic_data/olympic_data/track' # use your path
 all_files = glob.glob(path + "/*.csv")
 
@@ -25,7 +27,7 @@ frame_sp['Date_Y'] = str("20") + frame_sp['Date'].str[-2:]
 frame_sp['Mark_seconds'] = pd.to_numeric(frame_sp['Mark_seconds'], errors='coerce')
 
 frame_sp['Date_Y'] = pd.to_numeric(frame_sp['Date_Y'])
-years = np.linspace(2001,2021,21)
+years = np.linspace(2001,2019,19)
 years = years.astype("int")
 
 model = "l1_best" # l1_best, mean_variance
@@ -43,18 +45,19 @@ if model == "l1_best":
     events_list_m = np.sort(events_list_m)
     events_list_w = np.sort(events_list_w)
 
-    # Drop duplicates of best performance
-    normalized_trajectories = []
-    for i in range(len(events_list_m)):
-        # Compute L^1 norm of event i
-        event_i = men_best_performance[(men_best_performance["event"] == events_list_m[i])]
-        # Mean/event/year - men
-        means_i = []  # Average Male distance
-        for k in range(len(years)):
-            mean_year_event = event_i.loc[(event_i['Date_Y'] == years[k]), 'Mark_seconds'].mean()
-            means_i.append(mean_year_event)
-        norm_mark_i = means_i / np.sum(np.abs(means_i))
-        normalized_trajectories.append(norm_mark_i)
+    if make_trajectories_run:
+        # Drop duplicates of best performance
+        normalized_trajectories = []
+        for i in range(len(events_list_m)):
+            # Compute L^1 norm of event i
+            event_i = men_best_performance[(men_best_performance["event"] == events_list_m[i])]
+            # Mean/event/year - men
+            means_i = []  # Average Male distance
+            for k in range(len(years)):
+                mean_year_event = event_i.loc[(event_i['Date_Y'] == years[k]), 'Mark_seconds'].mean()
+                means_i.append(mean_year_event)
+            norm_mark_i = means_i / np.sum(np.abs(means_i))
+            normalized_trajectories.append(norm_mark_i)
 
     # Loop over all events, get time series L^1 normalize and determine distance trajectory
     male_distance_matrix = np.zeros((len(events_list_m),len(events_list_m)))

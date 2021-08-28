@@ -46,6 +46,10 @@ years = np.linspace(2001,2019,19)
 years = years.astype("int")
 direction_vector_list = []
 
+# Parameters on men and women
+params_m_list = []
+params_f_list = []
+
 for i in range(len(events_list_m)):
     # Slice a particular event
     event_m = genders[0][(genders[0]["event"] == events_list_m[i])]
@@ -77,6 +81,7 @@ for i in range(len(events_list_m)):
     # Model 1 statsmodels
     model_m = sm.OLS(y_m, x1_ones)
     results_m = model_m.fit()
+    params_m_list.append([events_list_m[i], results_m.params])
 
     # relabel
     label = re.sub('[!@#$\/]', '', events_list_m[i])
@@ -97,6 +102,7 @@ for i in range(len(events_list_m)):
     # Model 1 statsmodels
     model_f = sm.OLS(y_f, x1_ones)
     results_f = model_f.fit()
+    params_f_list.append([events_list_w[i], results_f.params])
 
     # relabel
     label = re.sub('[!@#$\/]', '', events_list_w[i])
@@ -109,4 +115,13 @@ for i in range(len(events_list_m)):
     plt.savefig("First_difference_"+label+"_women")
     plt.show()
 
+# Model parameters
+print(params_m_list)
+print(params_f_list)
 
+# Write to dataframe and then desktop
+params_m_df = pd.DataFrame(params_m_list)
+params_m_df.to_csv("/Users/tassjames/Desktop/track_first_difference_m.csv")
+
+params_f_df = pd.DataFrame(params_f_list)
+params_f_df.to_csv("/Users/tassjames/Desktop/track_first_difference_f.csv")

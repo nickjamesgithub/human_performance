@@ -125,10 +125,10 @@ for g in range(len(genders)):
         label = re.sub('[!@#$\/]', '', events_list_m[i])
 
         # Model 1, Model 2, Model 3, Model 4 fit (statsmodels)
-        plt.plot(x1, results1.fittedvalues, label="model 1", alpha=0.4)
-        plt.plot(x1, results2.fittedvalues, label="model 2", alpha=0.4)
-        plt.plot(x1, results3.fittedvalues, label="model 3", alpha=0.4)
-        plt.plot(x1, results4.fittedvalues, label="model 4", alpha=0.4)
+        # plt.plot(x1, results1.fittedvalues, label="model 1", alpha=0.4)
+        plt.plot(x1, results2.fittedvalues, label="Model 2", alpha=0.4)
+        # plt.plot(x1, results3.fittedvalues, label="model 3", alpha=0.4)
+        # plt.plot(x1, results4.fittedvalues, label="model 4", alpha=0.4)
         plt.scatter(x1, y, label="data")
         plt.legend()
         plt.title(events_list_m[i]+"_"+gender_labels[g] + "_" + str(top))
@@ -142,10 +142,10 @@ for g in range(len(genders)):
         pvals_list.append([events_list_m[i] + "_" + gender_labels[g], m1_pvals, m2_pvals, m3_pvals, m4_pvals])
 
         # Print results from each model
-        print("Model 1", results1.summary())
-        print("Model 2", results2.summary())
-        print("Model 3",results3.summary())
-        print("Model 4", results4.summary())
+        # print("Model 1", results1.summary())
+        # print("Model 2", results2.summary())
+        # print("Model 3",results3.summary())
+        # print("Model 4", results4.summary())
 
 # Print RMSE and R2
 print(AIC_list)
