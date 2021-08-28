@@ -10,7 +10,7 @@ from Utilities import generate_olympic_data
 import statsmodels.api as sm
 
 # Top 10/100
-top = 100 # 10/100
+top = 10 # 10/100
 
 path = '/Users/tassjames/Desktop/Olympic_data/olympic_data/track' # use your path
 all_files = glob.glob(path + "/*.csv")
