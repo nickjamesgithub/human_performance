@@ -151,7 +151,7 @@ for g in range(len(genders)):
         # Append AIC/BIC/Adjusted R^2/p values to list
         AIC_list.append([events_list_m[i] + "_" + gender_labels[g], m1_aic, m2_aic, m3_aic, m4_aic, m5_aic])
         BIC_list.append([events_list_m[i] + "_" + gender_labels[g], m1_bic, m2_bic, m3_bic, m4_bic, m5_bic])
-        r2_list.append([events_list_m[i] + "_" + gender_labels[g], m1_r2a, m2_r2a, m3_r2a, m4_r2a, m5_r2a])
+        r2_list.append([events_list_m[i] + "_" + gender_labels[g], m1_r2a, m2_r2a])
         pvals_list.append([events_list_m[i] + "_" + gender_labels[g], m1_pvals, m2_pvals, m3_pvals, m4_pvals, m5_pvals])
 
         # Print results from each model
@@ -161,8 +161,8 @@ for g in range(len(genders)):
         # print("Model 4", results4.summary())
         # print("Model 5", results5.summary())
 
-    # Print RMSE and R2
-    print(AIC_list)
-    print(BIC_list)
-    print(r2_list)
-    print(pvals_list)
+# Print RMSE and R2
+# print(AIC_list)
+# print(BIC_list)
+print(r2_list)
+# print(pvals_list)

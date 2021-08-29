@@ -81,10 +81,10 @@ for g in range(len(genders)):
         model1 = sm.OLS(y, multiple_indicator_ones) # Linear term
         results1 = model1.fit()
         # AIC/BIC/Adjusted R2
-        m1_aic = results1.aic
-        m1_bic = results1.bic
+        # m1_aic = results1.aic
+        # m1_bic = results1.bic
         m1_r2a = results1.rsquared_adj
-        m1_pvals = results1.pvalues
+        # m1_pvals = results1.pvalues
 
         # relabel
         label = re.sub('[!@#$\/]', '', events_list_m[i])
@@ -98,18 +98,18 @@ for g in range(len(genders)):
         plt.show()
 
         # Append AIC/BIC/Adjusted R^2/p values to list
-        AIC_list.append([events_list_m[i] + "_" + gender_labels[g], m1_aic])
-        BIC_list.append([events_list_m[i] + "_" + gender_labels[g], m1_bic])
+        # AIC_list.append([events_list_m[i] + "_" + gender_labels[g], m1_aic])
+        # BIC_list.append([events_list_m[i] + "_" + gender_labels[g], m1_bic])
         r2_list.append([events_list_m[i] + "_" + gender_labels[g], m1_r2a])
-        pvals_list.append([events_list_m[i] + "_" + gender_labels[g], m1_pvals])
+        # pvals_list.append([events_list_m[i] + "_" + gender_labels[g], m1_pvals])
 
-        # Print results from each model
-        print("Model 1", results1.summary())
+        # # Print results from each model
+        # print("Model 1", results1.summary())
 
 # Print RMSE and R2
-print(AIC_list)
-print(BIC_list)
+# print(AIC_list)
+# print(BIC_list)
 print(r2_list)
-print(pvals_list)
+# print(pvals_list)
 
 

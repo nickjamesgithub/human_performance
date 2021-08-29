@@ -80,7 +80,8 @@ for i in range(len(events_list_m)):
     # Model 1 statsmodels
     model_m = sm.OLS(y_m, x1_ones)
     results_m = model_m.fit()
-    print(results_m.summary())
+
+    # print(results_m.summary())
 
     # AIC/BIC/Adjusted R2
     params_m = results_m.params
@@ -129,6 +130,7 @@ print(params_f_list)
 # Write to dataframe and then desktop
 params_m_df = pd.DataFrame(params_m_list)
 params_m_df.to_csv("/Users/tassjames/Desktop/first_difference_m.csv")
+
 params_f_df = pd.DataFrame(params_f_list)
 params_f_df.to_csv("/Users/tassjames/Desktop/first_difference_f.csv")
 

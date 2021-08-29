@@ -122,4 +122,4 @@ cluster_labels = ["M 10K", "W 10K", "M 1500m", "W 1500m", "M 3k", "W 3k",
                   "M 800m", "W 800m", "M 100m", "W 100m", "M 200m", "W 200m",
                   "M 400m", "W 400m"]
 
-dendrogram_plot_labels(distance_array, "_inner_product_", "field", cluster_labels)
+dendrogram_plot_labels(distance_array, "_inner_product_", "track", cluster_labels)

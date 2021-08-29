@@ -1,27 +1,25 @@
 import pandas as pd
 import glob
+import datetime
 import numpy as np
 import matplotlib.pyplot as plt
-from Utilities import generate_olympic_data
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 import re
+from Utilities import generate_olympic_data
 import statsmodels.api as sm
 
-# Turn plots on/off with True/False
-make_plots = False # True/False
+# Top 10/100
+top = 10 # 10/100
 
-# Top 10/100 athletes
-top = 100 # 10/100
-
-path = '/Users/tassjames/Desktop/Olympic_data/olympic_data/field' # use your path
+path = '/Users/tassjames/Desktop/Olympic_data/olympic_data/track' # use your path
 all_files = glob.glob(path + "/*.csv")
 
 li = []
 li_specialised = []
 for filename in all_files:
     df = pd.read_csv(filename, index_col=None, header=0)
-    df_slice = df[["Rank", "Mark", "Nat", "gender", "event", "Date"]]
+    df_slice = df[["Rank", "Mark_seconds", "Nat", "gender", "event", "Date"]]
     li.append(df)
     li_specialised.append(df_slice)
 
@@ -30,7 +28,10 @@ frame = pd.concat(li, axis=0, ignore_index=True)
 frame_sp = pd.concat(li_specialised, axis=0, ignore_index=True)
 
 # Change date format to just year %YYYY
-frame_sp['Date'] = frame_sp['Date'].astype(str).str.extract('(\d{4})').astype(int)
+frame_sp['Date_Y'] = frame_sp['Date'].str[-2:]
+frame_sp['Date_Y'] = str("20") + frame_sp['Date'].str[-2:]
+frame_sp['Date_Y'] = pd.to_numeric(frame_sp['Date_Y'])
+frame_sp['Mark_seconds'] = pd.to_numeric(frame_sp['Mark_seconds'], errors='coerce')
 
 # Slice male and female performance
 men_best_performance = frame_sp[(frame_sp['gender'] == "men")]
@@ -40,12 +41,14 @@ gender_labels = ["men", "women"]
 # Get event lists
 events_list_m = men_best_performance["event"].unique()
 events_list_w = women_best_performance["event"].unique()
-# events_list = ['discus', 'high jump', 'shot put', 'triple jump', 'pole vault', 'long jump', 'javelin', 'hammer throw']
 events_list_m = np.sort(events_list_m)
 events_list_w = np.sort(events_list_w)
 
 # Loop over years of analysis
 years = np.linspace(2001,2019,19)
+years = years.astype("int")
+
+# Model parameters
 AIC_list = []
 BIC_list = []
 r2_list = []
@@ -60,73 +63,62 @@ for g in range(len(genders)):
         means = []
         for j in range(len(years)):
             if top == 100:
-                mean_year_event = event_i.loc[(event_i['Date'] == years[j]), 'Mark'].mean()
+                mean_year_event = event_i.loc[(event_i['Date_Y'] == years[j]), 'Mark_seconds'].mean()
                 means.append(mean_year_event)
             if top == 10:
-                year_event_top10 = event_i.loc[(event_i['Date'] == years[j]), 'Mark'][:10]
+                year_event_top10 = event_i.loc[(event_i['Date_Y'] == years[j]), 'Mark_seconds'][:10]
                 mean_year_event = year_event_top10.mean()
                 means.append(mean_year_event)
 
         # Slice response variable and two predictors
         y = np.array(means).reshape(-1,1)
-        x1 = np.reshape(np.linspace(1,19,19), (len(years),1)) # Linear
-        x1_ones = sm.tools.tools.add_constant(x1)
-        x2 = np.reshape(generate_olympic_data(x1), (19,1)) # Indicator
-
+        x1 = np.reshape(np.linspace(2001,2019,19), (len(years),1)) # Linear # Indicator
         # Combinations of features
-        linear_indicator = np.concatenate((x1,x2),axis=1) # linear + indicator
-
-        # Add column of ones
-        linear_indicator_ones = sm.tools.tools.add_constant(linear_indicator)
+        x2_indicator = np.reshape([0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0], (19,1))
+        x3_indicator = np.reshape([0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1], (19,1))
+        x4_indicator = np.reshape([0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0], (19,1))
+        multiple_indicator = np.concatenate((x1, x2_indicator, x3_indicator, x4_indicator), axis=1)  # linear + indicato
+        multiple_indicator_ones = sm.tools.tools.add_constant(multiple_indicator)
 
         # Model 1 statsmodels: linear
-        model1 = sm.OLS(y, x1_ones) # Linear term
+        model1 = sm.OLS(y, multiple_indicator_ones)  # Linear term
         results1 = model1.fit()
         # AIC/BIC/Adjusted R2
-        m1_aic = results1.aic
-        m1_bic = results1.bic
+        # m1_aic = results1.aic
+        # m1_bic = results1.bic
         m1_r2a = results1.rsquared_adj
-        m1_pvals = results1.pvalues
-
-        # Model 2 statsmodels: linear + indicator
-        model2 = sm.OLS(y, linear_indicator_ones) # Linear + indicator
-        results2 = model2.fit()
-        # AIC/BIC/Adjusted R2
-        m2_aic = results2.aic
-        m2_bic = results2.bic
-        m2_r2a = results2.rsquared_adj
-        m2_pvals = results2.pvalues
+        # m1_pvals = results1.pvalues
 
         # relabel
         label = re.sub('[!@#$\/]', '', events_list_m[i])
 
         # Model 1, Model 2, Model 3, Model 4 fit (statsmodels)
-        plt.plot(x1, results2.fittedvalues, label="Model 2", alpha=0.4)
         # plt.plot(x1, results1.fittedvalues, label="model 1", alpha=0.4)
+        plt.plot(x1, results1.fittedvalues, label="model 2", alpha=0.4)
         # plt.plot(x1, results3.fittedvalues, label="model 3", alpha=0.4)
         # plt.plot(x1, results4.fittedvalues, label="model 4", alpha=0.4)
+        # plt.plot(x1, results5.fittedvalues, label="model 5", alpha=0.4)
         plt.scatter(x1, y, label="data")
         plt.legend()
-        plt.title(events_list_m[i]+"_"+gender_labels[g] + "_" + str(top))
+        plt.title(events_list_m[i] + "_" + gender_labels[g] + "_" + str(top))
         plt.savefig(label + gender_labels[g] + "_" + str(top))
         plt.show()
 
         # Append AIC/BIC/Adjusted R^2/p values to list
-        AIC_list.append([events_list_m[i] + "_" + gender_labels[g], m1_aic, m2_aic])
-        BIC_list.append([events_list_m[i] + "_" + gender_labels[g], m1_bic, m2_bic])
-        r2_list.append([events_list_m[i] + "_" + gender_labels[g], m1_r2a, m2_r2a])
-        pvals_list.append([events_list_m[i] + "_" + gender_labels[g], m1_pvals, m2_pvals])
+        # AIC_list.append([events_list_m[i] + "_" + gender_labels[g], m1_aic, m2_aic, m3_aic, m4_aic, m5_aic])
+        # BIC_list.append([events_list_m[i] + "_" + gender_labels[g], m1_bic, m2_bic, m3_bic, m4_bic, m5_bic])
+        r2_list.append([events_list_m[i] + "_" + gender_labels[g], m1_r2a])
+        # pvals_list.append([events_list_m[i] + "_" + gender_labels[g], m1_pvals, m2_pvals, m3_pvals, m4_pvals, m5_pvals])
 
         # Print results from each model
         # print("Model 1", results1.summary())
         # print("Model 2", results2.summary())
-        # print("Model 3",results3.summary())
+        # print("Model 3", results3.summary())
         # print("Model 4", results4.summary())
+        # print("Model 5", results5.summary())
 
-# # Print RMSE and R2
+# Print RMSE and R2
 # print(AIC_list)
 # print(BIC_list)
 print(r2_list)
 # print(pvals_list)
-
-
