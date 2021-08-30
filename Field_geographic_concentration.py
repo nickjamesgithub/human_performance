@@ -145,17 +145,17 @@ concentration_scores = np.array(total_conc_vector)
 concentation_ordered = concentration_scores[concentration_scores[:, 0].argsort()]
 print(concentation_ordered)
 
-# Check largest and smallest geographic dispersion and get indices: Index 1 and 5
-date_grid = np.linspace(2001,2019,19)
-fig,ax = plt.subplots()
-plt.plot(date_grid, geographic_concentration_norms[1], label="Men's long jump")
-plt.plot(date_grid, geographic_concentration_norms[5], label="Men's hammer throw")
-plt.xlabel("Date")
-plt.ylabel("Distance matrix norm")
-plt.locator_params(axis='x', nbins=4)
-plt.tight_layout()
-plt.legend()
-plt.savefig("Geographic_two_plot_field")
-plt.show()
+# # Check largest and smallest geographic dispersion and get indices: Index 1 and 5
+# date_grid = np.linspace(2001,2019,19)
+# fig,ax = plt.subplots()
+# plt.plot(date_grid, geographic_concentration_norms[1], label="Men's long jump")
+# plt.plot(date_grid, geographic_concentration_norms[5], label="Men's hammer throw")
+# plt.xlabel("Date")
+# plt.ylabel("Distance matrix norm")
+# plt.locator_params(axis='x', nbins=4)
+# plt.tight_layout()
+# plt.legend()
+# plt.savefig("Geographic_two_plot_field")
+# plt.show()
 
 
