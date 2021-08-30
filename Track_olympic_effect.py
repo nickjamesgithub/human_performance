@@ -10,7 +10,7 @@ from Utilities import generate_olympic_data
 import statsmodels.api as sm
 
 # Top 10/100
-top = 10 # 10/100
+top = 100 # 10/100
 
 path = '/Users/tassjames/Desktop/Olympic_data/olympic_data/track' # use your path
 all_files = glob.glob(path + "/*.csv")
@@ -53,6 +53,7 @@ AIC_list = []
 BIC_list = []
 r2_list = []
 pvals_list = []
+params_list = []
 
 for g in range(len(genders)):
     for i in range(len(events_list_m)):
@@ -72,7 +73,7 @@ for g in range(len(genders)):
 
         # Slice response variable and two predictors
         y = np.array(means).reshape(-1,1)
-        x1 = np.reshape(np.linspace(2001,2019,19), (len(years),1)) # Linear
+        x1 = np.reshape(np.linspace(1,19,19), (len(years),1)) # Linear
         x1_ones = sm.tools.tools.add_constant(x1)
         x2 = np.reshape(generate_olympic_data(x1), (19,1)) # Indicator
         x3 = np.cos(np.pi / 2 * x1) # Periodic cos wave
@@ -105,6 +106,7 @@ for g in range(len(genders)):
         m2_bic = results2.bic
         m2_r2a = results2.rsquared_adj
         m2_pvals = results2.pvalues
+        m2_params = results2.params
 
         # Model 3 statsmodels: linear + periodic
         model3 = sm.OLS(y, linear_periodic_ones)  # linear + periodic
@@ -136,27 +138,33 @@ for g in range(len(genders)):
         # relabel
         label = re.sub('[!@#$\/]', '', events_list_m[i])
 
+        # Plotting grid
         # Model 1, Model 2, Model 3, Model 4 fit (statsmodels)
-        # plt.plot(x1, results1.fittedvalues, label="model 1", alpha=0.4)
-        plt.plot(x1, results2.fittedvalues, label="model 2", alpha=0.4)
+        x1 = x1.astype("int")
+        fig, ax = plt.subplots()
+        plt.plot(years, results2.fittedvalues, label="model 2", alpha=0.6)
         # plt.plot(x1, results3.fittedvalues, label="model 3", alpha=0.4)
         # plt.plot(x1, results4.fittedvalues, label="model 4", alpha=0.4)
         # plt.plot(x1, results5.fittedvalues, label="model 5", alpha=0.4)
-        plt.scatter(x1, y, label="data")
+        plt.scatter(years, y, label="data", color='red')
+        plt.locator_params(axis='x', nbins=4)
+        plt.ylabel("Time in seconds")
+        plt.xlabel("Date")
         plt.legend()
-        plt.title(events_list_m[i] + "_" + gender_labels[g] + "_" + str(top))
+        # plt.title(events_list_m[i] + "_" + gender_labels[g] + "_" + str(top))
         plt.savefig(label + gender_labels[g] + "_" + str(top))
-        plt.show()
+        # plt.show()
 
         # Append AIC/BIC/Adjusted R^2/p values to list
-        AIC_list.append([events_list_m[i] + "_" + gender_labels[g], m1_aic, m2_aic, m3_aic, m4_aic, m5_aic])
-        BIC_list.append([events_list_m[i] + "_" + gender_labels[g], m1_bic, m2_bic, m3_bic, m4_bic, m5_bic])
-        r2_list.append([events_list_m[i] + "_" + gender_labels[g], m1_r2a, m2_r2a])
-        pvals_list.append([events_list_m[i] + "_" + gender_labels[g], m1_pvals, m2_pvals, m3_pvals, m4_pvals, m5_pvals])
+        # AIC_list.append([events_list_m[i] + "_" + gender_labels[g], m1_aic, m2_aic, m3_aic, m4_aic, m5_aic])
+        # BIC_list.append([events_list_m[i] + "_" + gender_labels[g], m1_bic, m2_bic, m3_bic, m4_bic, m5_bic])
+        # r2_list.append([events_list_m[i] + "_" + gender_labels[g], m1_r2a, m2_r2a])
+        # pvals_list.append([events_list_m[i] + "_" + gender_labels[g], m1_pvals, m2_pvals, m3_pvals, m4_pvals, m5_pvals])
+        params_list.append([events_list_m[i] + "_" + gender_labels[g], m2_params])
 
         # Print results from each model
         # print("Model 1", results1.summary())
-        # print("Model 2", results2.summary())
+        # print("Model 2", events_list_m[i] + "_" + gender_labels[g], results2.summary())
         # print("Model 3", results3.summary())
         # print("Model 4", results4.summary())
         # print("Model 5", results5.summary())
@@ -164,5 +172,6 @@ for g in range(len(genders)):
 # Print RMSE and R2
 # print(AIC_list)
 # print(BIC_list)
-print(r2_list)
+# print(r2_list)
+print(params_list)
 # print(pvals_list)

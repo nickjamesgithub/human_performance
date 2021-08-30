@@ -37,7 +37,7 @@ events_list_m = men_best_performance["event"].unique()
 events_list_w = women_best_performance["event"].unique()
 # events_list = ['discus', 'high jump', 'shot put', 'triple jump', 'pole vault', 'long jump', 'javelin', 'hammer throw']
 events_list_m = np.sort(events_list_m)
-events_list_w =np.sort(events_list_w)
+events_list_w = np.sort(events_list_w)
 
 # Loop over years of analysis
 years = np.linspace(2001,2019,19)
@@ -46,6 +46,8 @@ coordinates = pd.read_csv("/Users/tassjames/Desktop/Olympic_data/olympic_data/co
 geographic_concentration_norms = []
 event_labels = []
 
+# Label_list
+label_list = []
 # def haversine(lon1, lat1, lon2, lat2):
 for g in range(len(genders)):
     for i in range(len(events_list_m)):
@@ -102,14 +104,15 @@ for g in range(len(genders)):
                     distance_matrix[a,b] = h_distance
                 counter += 1
 
-            # relabel
-            label = re.sub('[!@#$\/]', '', events_list_m[i])
-
             # Compute norm of distance matrix
             l2_norm = np.linalg.norm(distance_matrix)
             norms.append(l2_norm) # Append L2 Norm
             # counter += 100
             print(counter)
+
+        # relabel
+        label = re.sub('[!@#$\/]', '', events_list_m[i])
+        label_list.append(label)
 
         # Append Geographic concentration norms
         geographic_concentration_norms.append(norms)
@@ -117,6 +120,7 @@ for g in range(len(genders)):
 
         # Print out event ordering
         print(events_list_m[i], gender_labels[g])
+
 
 # Print all event labels
 print(event_labels)
@@ -127,10 +131,10 @@ event_names = ["High jump M", "Long jump M", "Pole vault M", "Triple jump M", "D
 # Loop over sequential norms
 total_conc_vector = []
 for i in range(len(geographic_concentration_norms)):
-    title = event_names[i]
-    total_concentration = np.sum(geographic_concentration_norms[i]) * 10**-7
-    total_conc_vector.append([total_concentration, title])
-    plt.plot(geographic_concentration_norms[i], label=title)
+    # title = event_names[i]
+    total_concentration = np.sum(geographic_concentration_norms[i])
+    total_conc_vector.append([total_concentration, event_names[i]])
+    plt.plot(geographic_concentration_norms[i], label=event_names[i])
 plt.title("Field geographic concentration")
 plt.legend()
 plt.savefig("Field_geographic_concentration")
@@ -140,5 +144,18 @@ plt.show()
 concentration_scores = np.array(total_conc_vector)
 concentation_ordered = concentration_scores[concentration_scores[:, 0].argsort()]
 print(concentation_ordered)
+
+# Check largest and smallest geographic dispersion and get indices: Index 1 and 5
+date_grid = np.linspace(2001,2019,19)
+fig,ax = plt.subplots()
+plt.plot(date_grid, geographic_concentration_norms[1], label="Men's long jump")
+plt.plot(date_grid, geographic_concentration_norms[5], label="Men's hammer throw")
+plt.xlabel("Date")
+plt.ylabel("Distance matrix norm")
+plt.locator_params(axis='x', nbins=4)
+plt.tight_layout()
+plt.legend()
+plt.savefig("Geographic_two_plot_field")
+plt.show()
 
 

@@ -111,6 +111,10 @@ for i in range(len(events_list_m)):
     params_f = results_f.params
     params_f_list.append([events_list_w[i], params_f])
 
+    # Results for men and women
+    print("Men "+events_list_m[i], results_m.summary())
+    print("Women "+events_list_w[i], results_f.summary())
+
     # relabel
     label = re.sub('[!@#$\/]', '', events_list_w[i])
 

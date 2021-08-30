@@ -104,6 +104,10 @@ for i in range(len(events_list_m)):
     results_f = model_f.fit()
     params_f_list.append([events_list_w[i], results_f.params])
 
+    # Results for men and women
+    print("Men "+events_list_m[i], results_m.summary())
+    print("Women "+events_list_w[i], results_f.summary())
+
     # relabel
     label = re.sub('[!@#$\/]', '', events_list_w[i])
 
