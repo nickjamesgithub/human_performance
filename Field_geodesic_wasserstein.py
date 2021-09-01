@@ -111,22 +111,37 @@ for g in range(len(genders)):
 
         # Generate Density function
         mutual_information = []
+        geodesic_wasserstein = []
         for t1 in range(len(country_counts_list)):
             # Generate distribution of nationalities at each year
             counts_time_1 = country_counts_list[t1]
             counts_time_pdf_1 = country_counts_list[t1]/np.sum(country_counts_list[t1])
             a= 0.001
             b = 1.0
-            unif_dist = np.linspace(sp.uniform.ppf(0.01, a, b), sp.uniform.ppf(0.99, a, b), len(counts_time_pdf_1))
+            unif_pdf = np.linspace(sp.uniform.ppf(0.01, a, b), sp.uniform.ppf(0.99, a, b), len(counts_time_pdf_1))
+
+            plt.plot(unif_pdf)
+            plt.show()
 
             # Compute Mutual Information
-            mi = mutual_info_score(counts_time_pdf_1, unif_dist)
+            mi = mutual_info_score(counts_time_pdf_1, unif_pdf)
             mutual_information.append(mi)
 
-        plt.plot(mutual_information)
-        plt.show()
+            # Compute Geodesic Wasserstein
+            gw_distance = np.nan_to_num(emd(counts_time_pdf_1, unif_pdf, global_geographic_distance))
+            geodesic_wasserstein.append(gw_distance)
+            block = 1
 
-        block = 1
+
+        # relabel
+        label = re.sub('[!@#$\/]', '', events_list_m[i])
+
+        # Plot mutual information between uniform and Olympic distribution
+        plt.plot(mutual_information)
+        plt.xlabel("Date")
+        plt.ylabel("Mutual Information")
+        plt.savefig("Mutual_information_"+gender_labels[g]+"_"+label)
+        plt.show()
 
 
 
