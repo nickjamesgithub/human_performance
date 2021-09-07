@@ -81,7 +81,7 @@ for i in range(len(events_list_m)):
     model_m = sm.OLS(y_m, x1_ones)
     results_m = model_m.fit()
 
-    # print(results_m.summary())
+    print(results_m.summary())
 
     # AIC/BIC/Adjusted R2
     params_m = results_m.params
@@ -127,9 +127,9 @@ for i in range(len(events_list_m)):
         plt.savefig("First_difference_"+label+"_women")
         plt.show()
 
-# Model parameters
-print(params_m_list)
-print(params_f_list)
+# # Model parameters
+# print(params_m_list)
+# print(params_f_list)
 
 # Write to dataframe and then desktop
 params_m_df = pd.DataFrame(params_m_list)

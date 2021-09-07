@@ -120,8 +120,8 @@ for i in range(len(events_list_m)):
     plt.show()
 
 # Model parameters
-print(params_m_list)
-print(params_f_list)
+# print(params_m_list)
+# print(params_f_list)
 
 # Write to dataframe and then desktop
 params_m_df = pd.DataFrame(params_m_list)

@@ -1,20 +1,12 @@
-import scipy.stats as sp
 from pyemd import emd, emd_with_flow, emd_samples
 from math import radians, cos, sin, asin, sqrt
 import pandas as pd
 import glob
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.metrics import mutual_info_score
-import math
 from Utilities import generate_olympic_data, dendrogram_plot_labels, haversine
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error, r2_score
 import re
-from scipy.stats import wasserstein_distance
 
-
-# We better push our code!
 make_plots = False
 path = '/Users/tassjames/Desktop/Olympic_data/olympic_data/track' # use your path
 all_files = glob.glob(path + "/*.csv")
@@ -92,6 +84,7 @@ years = years.astype("int")
 
 # Label_list
 label_list = []
+gw_trajectories = []
 # def haversine(lon1, lat1, lon2, lat2):
 for g in range(len(genders)):
     for i in range(len(events_list_m)):
@@ -140,16 +133,33 @@ for g in range(len(genders)):
             print("Geodesic Wasserstein is "+gender_labels[g]+label, gw_distance_t)
             print(t)
 
-        # # Plot mutual information between uniform and Olympic distribution
-        # plt.plot(mutual_information)
-        # plt.xlabel("Date")
-        # plt.ylabel("Mutual Information")
-        # plt.savefig("Mutual_information_"+gender_labels[g]+"_"+label)
-        # plt.show()
+        # Append GW trajectories to major list
+        gw_trajectories.append(geodesic_wasserstein)
 
-        # Plot Geodesic Wasserstein between uniform and Olympic distribution
-        plt.plot(geodesic_wasserstein)
-        plt.xlabel("Date")
-        plt.ylabel("Geodesic Wasserstein")
-        plt.savefig("Geodesic_wasserstein_"+gender_labels[g]+"_"+label)
-        plt.show()
+        if make_plots:
+            # Plot Geodesic Wasserstein between uniform and Olympic distribution
+            plt.plot(geodesic_wasserstein)
+            plt.xlabel("Date")
+            plt.ylabel("Geodesic Wasserstein")
+            plt.savefig("Geodesic_wasserstein_"+gender_labels[g]+"_"+label)
+            plt.show()
+
+# Geodesic Wasserstein trajectories
+gw_trajectory_matrix = np.zeros((len(gw_trajectories), len(gw_trajectories)))
+for i in range(len(gw_trajectories)):
+    for j in range(len(gw_trajectories)):
+        gw_tr_i = np.array(gw_trajectories[i]/np.sum(gw_trajectories[i]))
+        gw_tr_j = np.array(gw_trajectories[j]/np.sum(gw_trajectories[j]))
+        gw_trajectory_matrix[i,j] = np.sum(np.abs(gw_tr_i - gw_tr_j))
+
+# Track events: 10k, 1500, 3k, 5k, 800m, 100, 200, 400
+cluster_labels = ["M 10K", "W 10K", "M 1500m", "W 1500m", "M 3k", "W 3k",
+                  "M 5k", "W 5k",
+                  "M 800m", "W 800m", "M 100m", "W 100m", "M 200m", "W 200m",
+                  "M 400m", "W 400m"]
+
+# Create an array for geodesic matrix trajectories list of lists
+gw_trajectory_matrix_array = np.array(gw_trajectory_matrix)
+
+# Form distance matrix between geodesic wasserstein trajectories
+dendrogram_plot_labels(gw_trajectory_matrix_array, "Geodesic_variance_trajectory_", "Track_", cluster_labels)

@@ -10,7 +10,7 @@ from Utilities import generate_olympic_data
 import statsmodels.api as sm
 
 # Top 10/100
-top = 100 # 10/100
+top = 10 # 10/100
 
 path = '/Users/tassjames/Desktop/Olympic_data/olympic_data/track' # use your path
 all_files = glob.glob(path + "/*.csv")
@@ -89,14 +89,14 @@ for g in range(len(genders)):
         linear_indicator_periodic_ones = sm.tools.tools.add_constant(linear_indicator_periodic)
         periodic_ones = sm.tools.tools.add_constant(x3)
 
-        # Model 1 statsmodels: linear
-        model1 = sm.OLS(y, x1_ones)  # Linear term
-        results1 = model1.fit()
-        # AIC/BIC/Adjusted R2
-        m1_aic = results1.aic
-        m1_bic = results1.bic
-        m1_r2a = results1.rsquared_adj
-        m1_pvals = results1.pvalues
+        # # Model 1 statsmodels: linear
+        # model1 = sm.OLS(y, x1_ones)  # Linear term
+        # results1 = model1.fit()
+        # # AIC/BIC/Adjusted R2
+        # m1_aic = results1.aic
+        # m1_bic = results1.bic
+        # m1_r2a = results1.rsquared_adj
+        # m1_pvals = results1.pvalues
 
         # Model 2 statsmodels: linear + indicator
         model2 = sm.OLS(y, linear_indicator_ones)  # Linear + indicator
@@ -108,35 +108,38 @@ for g in range(len(genders)):
         m2_pvals = results2.pvalues
         m2_params = results2.params
 
-        # Model 3 statsmodels: linear + periodic
-        model3 = sm.OLS(y, linear_periodic_ones)  # linear + periodic
-        results3 = model3.fit()
-        # AIC/BIC/Adjusted R2
-        m3_aic = results3.aic
-        m3_bic = results3.bic
-        m3_r2a = results3.rsquared_adj
-        m3_pvals = results3.pvalues
-
-        # Model 4 statsmodels: linear + periodic
-        model4 = sm.OLS(y, linear_indicator_periodic_ones)  # Linear + periodic + indicator
-        results4 = model4.fit()
-        # AIC/BIC/Adjusted R2
-        m4_aic = results4.aic
-        m4_bic = results4.bic
-        m4_r2a = results4.rsquared_adj
-        m4_pvals = results4.pvalues
-
-        # Model 5 statsmodels: linear + periodic
-        model5 = sm.OLS(y, periodic_ones)  # Periodic function
-        results5 = model5.fit()
-        # AIC/BIC/Adjusted R2
-        m5_aic = results5.aic
-        m5_bic = results5.bic
-        m5_r2a = results5.rsquared_adj
-        m5_pvals = results5.pvalues
+        # # Model 3 statsmodels: linear + periodic
+        # model3 = sm.OLS(y, linear_periodic_ones)  # linear + periodic
+        # results3 = model3.fit()
+        # # AIC/BIC/Adjusted R2
+        # m3_aic = results3.aic
+        # m3_bic = results3.bic
+        # m3_r2a = results3.rsquared_adj
+        # m3_pvals = results3.pvalues
+        #
+        # # Model 4 statsmodels: linear + periodic
+        # model4 = sm.OLS(y, linear_indicator_periodic_ones)  # Linear + periodic + indicator
+        # results4 = model4.fit()
+        # # AIC/BIC/Adjusted R2
+        # m4_aic = results4.aic
+        # m4_bic = results4.bic
+        # m4_r2a = results4.rsquared_adj
+        # m4_pvals = results4.pvalues
+        #
+        # # Model 5 statsmodels: linear + periodic
+        # model5 = sm.OLS(y, periodic_ones)  # Periodic function
+        # results5 = model5.fit()
+        # # AIC/BIC/Adjusted R2
+        # m5_aic = results5.aic
+        # m5_bic = results5.bic
+        # m5_r2a = results5.rsquared_adj
+        # m5_pvals = results5.pvalues
 
         # relabel
         label = re.sub('[!@#$\/]', '', events_list_m[i])
+
+        # Summary of results
+        print(label + gender_labels[g], results2.summary())
 
         # Plotting grid
         # Model 1, Model 2, Model 3, Model 4 fit (statsmodels)

@@ -12,7 +12,7 @@ import statsmodels.api as sm
 make_plots = False # True/False
 
 # Top 10/100 athletes
-top = 100 # 10/100
+top = 10 # 10/100
 
 path = '/Users/tassjames/Desktop/Olympic_data/olympic_data/field' # use your path
 all_files = glob.glob(path + "/*.csv")
@@ -101,6 +101,9 @@ for g in range(len(genders)):
 
         # relabel
         label = re.sub('[!@#$\/]', '', events_list_m[i])
+
+        # Summary of results
+        print(label + gender_labels[g], results2.summary())
 
         # Model 1, Model 2, Model 3, Model 4 fit (statsmodels)
         fig,ax = plt.subplots()

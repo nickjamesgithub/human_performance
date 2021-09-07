@@ -1,17 +1,13 @@
-import scipy.stats as sp
-from pyemd import emd, emd_with_flow
+from pyemd import emd, emd_with_flow, emd_samples
 from math import radians, cos, sin, asin, sqrt
 import pandas as pd
 import glob
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.metrics import mutual_info_score
-import math
-from Utilities import generate_olympic_data, dendrogram_plot_labels, haversine
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error, r2_score
 import re
-from scipy.stats import wasserstein_distance
+from Utilities import dendrogram_plot_labels
+
+make_plots = False
 
 path = '/Users/tassjames/Desktop/Olympic_data/olympic_data/field' # use your path
 all_files = glob.glob(path + "/*.csv")
@@ -57,12 +53,17 @@ def haversine(lon1, lat1, lon2, lat2):
     dlat = lat2 - lat1
     a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
     c = 2 * asin(sqrt(a))
-    r = 6378000  # Radius of earth in kilometers. Use 3956 for miles
+    r = 6378  # Radius of earth in kilometers. Use 3956 for miles
     return c * r
 
 # Read in geographic data
 coordinates = pd.read_csv("/Users/tassjames/Desktop/Olympic_data/olympic_data/country_coordinates_olympic_GW.csv")
 country_labels = coordinates["Athlete_Code"]
+
+# Read in Uniform distribution values
+uniform_values = pd.read_excel("/Users/tassjames/Desktop/Olympic_data/Uniform_distribution.xlsx")
+unif_vals = uniform_values.iloc[:,0]
+unif_pdf = np.float64(unif_vals/np.sum(unif_vals))
 
 # Global geographic distance
 global_geographic_distance = np.zeros((len(coordinates), len(coordinates)))
@@ -74,6 +75,7 @@ for i in range(len(coordinates)):
         long_j = coordinates['Longitude_n'][j]
         distance = haversine(long_i, lat_i, long_j, lat_j)
         global_geographic_distance[i, j] = distance
+global_geographic_distance = np.nan_to_num(global_geographic_distance)
 
 # Loop over years of analysis and get counts of each country
 years = np.linspace(2001,2019,19)
@@ -81,6 +83,7 @@ years = years.astype("int")
 
 # Label_list
 label_list = []
+gw_trajectories = []
 # def haversine(lon1, lat1, lon2, lat2):
 for g in range(len(genders)):
     for i in range(len(events_list_m)):
@@ -109,83 +112,52 @@ for g in range(len(genders)):
             test = np.sum(country_counts)
             print("test counts", test)
 
-        # Generate Density function
-        mutual_information = []
-        geodesic_wasserstein = []
-        for t1 in range(len(country_counts_list)):
-            # Generate distribution of nationalities at each year
-            counts_time_1 = country_counts_list[t1]
-            counts_time_pdf_1 = country_counts_list[t1]/np.sum(country_counts_list[t1])
-            a= 0.001
-            b = 1.0
-            unif_pdf = np.linspace(sp.uniform.ppf(0.01, a, b), sp.uniform.ppf(0.99, a, b), len(counts_time_pdf_1))
-
-            plt.plot(unif_pdf)
-            plt.show()
-
-            # Compute Mutual Information
-            mi = mutual_info_score(counts_time_pdf_1, unif_pdf)
-            mutual_information.append(mi)
-
-            # Compute Geodesic Wasserstein
-            gw_distance = np.nan_to_num(emd(counts_time_pdf_1, unif_pdf, global_geographic_distance))
-            geodesic_wasserstein.append(gw_distance)
-            block = 1
-
-
         # relabel
         label = re.sub('[!@#$\/]', '', events_list_m[i])
 
-        # Plot mutual information between uniform and Olympic distribution
-        plt.plot(mutual_information)
-        plt.xlabel("Date")
-        plt.ylabel("Mutual Information")
-        plt.savefig("Mutual_information_"+gender_labels[g]+"_"+label)
-        plt.show()
+        # Generate Density function
+        mutual_information = []
+        geodesic_wasserstein = []
+        for t in range(len(country_counts_list)):
+            # Generate distribution of nationalities at each year
+            counts_time_1 = np.float64(np.nan_to_num(country_counts_list[t]))
+            counts_time_array = np.nan_to_num(np.float64(counts_time_1).flatten())
+            counts_time_pdf = np.float64(country_counts_list[t]/np.sum(country_counts_list[t]))
 
+            # Uniform samples
+            unif_ones = np.array([np.random.normal(1,.001,238)]).flatten().astype('float64')
+            unif_pdf = np.float64(unif_ones/np.sum(unif_ones))
+            gw_distance_t = np.nan_to_num(emd(counts_time_pdf, unif_pdf, global_geographic_distance))
+            geodesic_wasserstein.append(gw_distance_t)
 
+            print("Geodesic Wasserstein is "+gender_labels[g]+label, gw_distance_t)
+            print(t)
 
-#
-# # Loop over time series
-# counter = 0
-# geodesic_variance = []
-# for t in range(len(new_cases_burn[0])):  # Looping over time
-#     cases_slice = new_cases_burn[:, t]  # Slice of cases in time
-#     cases_slice_pdf = np.nan_to_num(cases_slice / np.sum(cases_slice))
-#
-#     # Country variance matrix
-#     country_variance = np.zeros((len(cases_slice_pdf), len(cases_slice_pdf)))
-#
-#     # Loop over all the countries in the pdf
-#     for x in range(len(cases_slice_pdf)):
-#         for y in range(len(cases_slice_pdf)):
-#             # # Print state names
-#             # print(names_dc[x])
-#             # print(names_dc[y])
-#             country_x_density = cases_slice_pdf[x]
-#             country_y_density = cases_slice_pdf[y]
-#             lats_x = usa_location_data["Latitude"][x]
-#             lats_y = usa_location_data["Latitude"][y]
-#             longs_x = usa_location_data["Longitude"][x]
-#             longs_y = usa_location_data["Longitude"][y]
-#             geodesic_distance = haversine(longs_x, lats_x, longs_y, lats_y)
-#
-#             # Compute country variance
-#             country_variance[x, y] = geodesic_distance ** 2 * country_x_density * country_y_density
-#
-#     # Sum above the diagonal
-#     upper_distance_sum = np.triu(country_variance).sum() - np.trace(country_variance)
-#     geodesic_variance.append(upper_distance_sum)
-#     print("Iteration " + str(t) + " / " + str(len(new_cases_burn[0])))
-#
-# # Time-varying geodesic variance
-# plt.plot(date_index_array_burn, geodesic_variance)
-# plt.xlabel("Time")
-# plt.ylabel("Geodesic Wasserstein variance")
-# plt.title("Spatial variance")
-# plt.savefig("Geodesic_variance_individual_PDF")
-# plt.show()
+        # Append GW trajectories to major list
+        gw_trajectories.append(geodesic_wasserstein)
 
+        if make_plots:
+            # Plot Geodesic Wasserstein between uniform and Olympic distribution
+            plt.plot(geodesic_wasserstein)
+            plt.xlabel("Date")
+            plt.ylabel("Geodesic Wasserstein")
+            plt.title(gender_labels[g] + "_" + label)
+            plt.savefig("Geodesic_wasserstein_"+gender_labels[g]+"_"+label)
+            plt.show()
 
+# Geodesic Wasserstein trajectories
+gw_trajectory_matrix = np.zeros((len(gw_trajectories), len(gw_trajectories)))
+for i in range(len(gw_trajectories)):
+    for j in range(len(gw_trajectories)):
+        gw_tr_i = np.array(gw_trajectories[i]/np.sum(gw_trajectories[i]))
+        gw_tr_j = np.array(gw_trajectories[j]/np.sum(gw_trajectories[j]))
+        gw_trajectory_matrix[i,j] = np.sum(np.abs(gw_tr_i - gw_tr_j))
 
+cluster_labels = ["M high jump", "W high jump", "M long jump", "W long jump", "M pole vault", "W pole vault", "M triple jump", "W triple jump",
+                  "M discus", "W discus", "M hammer throw", "W hammer throw", "M javelin", "W javelin", "M shot put", "W shot put"]
 
+# Create an array for geodesic matrix trajectories list of lists
+gw_trajectory_matrix_array = np.array(gw_trajectory_matrix)
+
+# Form distance matrix between geodesic wasserstein trajectories
+dendrogram_plot_labels(gw_trajectory_matrix_array, "Geodesic_variance_trajectory_", "Field_", cluster_labels)
