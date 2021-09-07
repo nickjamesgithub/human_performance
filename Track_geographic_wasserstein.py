@@ -8,6 +8,7 @@ from Utilities import generate_olympic_data, dendrogram_plot_labels, haversine
 import re
 
 make_plots = False
+
 path = '/Users/tassjames/Desktop/Olympic_data/olympic_data/track' # use your path
 all_files = glob.glob(path + "/*.csv")
 
@@ -141,6 +142,7 @@ for g in range(len(genders)):
             plt.plot(geodesic_wasserstein)
             plt.xlabel("Date")
             plt.ylabel("Geodesic Wasserstein")
+            plt.title(gender_labels[g] + "_" + label)
             plt.savefig("Geodesic_wasserstein_"+gender_labels[g]+"_"+label)
             plt.show()
 
@@ -153,10 +155,10 @@ for i in range(len(gw_trajectories)):
         gw_trajectory_matrix[i,j] = np.sum(np.abs(gw_tr_i - gw_tr_j))
 
 # Track events: 10k, 1500, 3k, 5k, 800m, 100, 200, 400
-cluster_labels = ["M 10K", "W 10K", "M 1500m", "W 1500m", "M 3k", "W 3k",
-                  "M 5k", "W 5k",
-                  "M 800m", "W 800m", "M 100m", "W 100m", "M 200m", "W 200m",
-                  "M 400m", "W 400m"]
+cluster_labels = ["M 10K", "M 1500m", "M 3k",
+                  "M 5k", "M 800m", "M 100m", "M 200m", "M 400m",
+                  "W 10K", "W 1500m", "W 3k",
+                  "W 5k", "W 800m", "W 100m", "W 200m", "W 400m"]
 
 # Create an array for geodesic matrix trajectories list of lists
 gw_trajectory_matrix_array = np.array(gw_trajectory_matrix)

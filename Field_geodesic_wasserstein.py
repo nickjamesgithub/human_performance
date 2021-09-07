@@ -153,8 +153,8 @@ for i in range(len(gw_trajectories)):
         gw_tr_j = np.array(gw_trajectories[j]/np.sum(gw_trajectories[j]))
         gw_trajectory_matrix[i,j] = np.sum(np.abs(gw_tr_i - gw_tr_j))
 
-cluster_labels = ["M high jump", "W high jump", "M long jump", "W long jump", "M pole vault", "W pole vault", "M triple jump", "W triple jump",
-                  "M discus", "W discus", "M hammer throw", "W hammer throw", "M javelin", "W javelin", "M shot put", "W shot put"]
+cluster_labels = ["M high jump", "M long jump", "M pole vault", "M triple jump", "M discus", "M hammer throw", "M javelin",  "M shot put",
+                  "W high jump", "W long jump", "W pole vault", "W triple jump", "W discus", "W hammer throw", "W javelin",  "W shot put"]
 
 # Create an array for geodesic matrix trajectories list of lists
 gw_trajectory_matrix_array = np.array(gw_trajectory_matrix)
