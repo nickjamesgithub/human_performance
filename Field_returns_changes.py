@@ -113,4 +113,7 @@ distance_array = np.reshape(distance_array, (2*len(events_list_m), 2*len(events_
 plt.matshow(distance_array)
 plt.show()
 
-dendrogram_plot_labels(distance_array, "_inner_product_", "field", cluster_labels)
+cluster_labels = ["M high jump", "W high jump", "M long jump", "W long jump", "M pole vault", "W pole vault", "M triple jump", "W triple jump",
+                  "M discus", "W discus", "M hammer throw", "W hammer throw", "M javelin", "W javelin", "M shot put", "W shot put"]
+
+dendrogram_plot_labels(distance_array, "_inner_product_1", "field", cluster_labels)

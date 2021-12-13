@@ -66,10 +66,16 @@ for i in range(len(events_list_m)):
     # relabel
     label = re.sub('[!@#$\/]', '', events_list_w[i])
 
+    # Compute linear model components for men and women
+    men_m, men_b = np.polyfit(years, trajectory_m, 1)
+    women_m, women_b = np.polyfit(years, trajectory_f, 1)
+
     # Plot of men and women
     fig, ax = plt.subplots()
     plt.scatter(years, trajectory_m, color='blue', alpha=0.7, label="Men")
+    plt.plot(years, men_m * years + men_b, color='blue', alpha=0.7)
     plt.scatter(years, trajectory_f, color='red', alpha=0.7, label="Women")
+    plt.plot(years, women_m * years + women_b, color='red', alpha=0.7)
     plt.locator_params(axis='x', nbins=4)
     plt.ylabel("Normalized trajectory")
     plt.xlabel("Date")

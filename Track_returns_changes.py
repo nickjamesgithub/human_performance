@@ -90,7 +90,7 @@ for i in range(len(events_list_m)):
                 # Mean/event/year - i
                 means_i = []  # Average i distance
                 for k in range(len(years)):
-                    mean_year_event_i = event_i.loc[(event_i['Date_Y'] == years[k]), 'Mark_seconds'].mean()
+                    mean_year_event_i = event_i.loc[(event_i['Date_Y'] == years[k]), 'Mark_seconds'].iloc[0]#.mean()
                     means_i.append(mean_year_event_i)
 
                 # Compute male returns
@@ -99,7 +99,7 @@ for i in range(len(events_list_m)):
                 # Mean/event/year - j
                 means_j = []  # Average j distance
                 for k in range(len(years)):
-                    mean_year_event_j = event_j.loc[(event_j['Date_Y'] == years[k]), 'Mark_seconds'].mean()
+                    mean_year_event_j = event_j.loc[(event_j['Date_Y'] == years[k]), 'Mark_seconds'].iloc[0]#.mean()
                     means_j.append(mean_year_event_j)
 
                 # Compute male returns
@@ -122,4 +122,4 @@ cluster_labels = ["M 10K", "W 10K", "M 1500m", "W 1500m", "M 3k", "W 3k",
                   "M 800m", "W 800m", "M 100m", "W 100m", "M 200m", "W 200m",
                   "M 400m", "W 400m"]
 
-dendrogram_plot_labels(distance_array, "_inner_product_", "track", cluster_labels)
+dendrogram_plot_labels(distance_array, "_inner_product_1", "track", cluster_labels)

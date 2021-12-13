@@ -82,3 +82,26 @@ def dendrogram_plot_labels(matrix, distance_measure, data_generation, labels):
 
     # Display and save figure.
     fig.show()
+
+def gini(x):
+    # (Warning: This is a concise implementation, but it is O(n**2)
+    # in time and memory, where n = len(x).  *Don't* pass in huge
+    # samples!)
+
+    # Mean absolute difference
+    mad = np.abs(np.subtract.outer(x, x)).mean()
+    # Relative mean absolute difference
+    rmad = mad/np.mean(x)
+    # Gini coefficient
+    g = np.nan_to_num(0.5 * rmad)
+    return g
+
+from typing import List
+from itertools import combinations
+import numpy as np
+
+def gini_coefficient(x: List[float]) -> float:
+    x = np.array(x, dtype=np.float32)
+    n = len(x)
+    diffs = sum(abs(i - j) for i, j in combinations(x, r=2))
+    return diffs / (2 * n**2 * x.mean())

@@ -9,8 +9,8 @@ import re
 from Utilities import generate_olympic_data
 import statsmodels.api as sm
 
-# Top 10/100
-top = 10 # 10/100
+# Top 1/10/100
+top = 10 # 1/10/100
 
 path = '/Users/tassjames/Desktop/Olympic_data/olympic_data/track' # use your path
 all_files = glob.glob(path + "/*.csv")
@@ -70,6 +70,10 @@ for g in range(len(genders)):
                 year_event_top10 = event_i.loc[(event_i['Date_Y'] == years[j]), 'Mark_seconds'][:10]
                 mean_year_event = year_event_top10.mean()
                 means.append(mean_year_event)
+            if top == 1:
+                year_event_top1 = event_i.loc[(event_i['Date_Y'] == years[j]), 'Mark_seconds'][:1]
+                mean_year_event = year_event_top1
+                means.append(mean_year_event)
 
         # Slice response variable and two predictors
         y = np.array(means).reshape(-1,1)
@@ -89,14 +93,17 @@ for g in range(len(genders)):
         linear_indicator_periodic_ones = sm.tools.tools.add_constant(linear_indicator_periodic)
         periodic_ones = sm.tools.tools.add_constant(x3)
 
-        # # Model 1 statsmodels: linear
-        # model1 = sm.OLS(y, x1_ones)  # Linear term
-        # results1 = model1.fit()
-        # # AIC/BIC/Adjusted R2
-        # m1_aic = results1.aic
-        # m1_bic = results1.bic
-        # m1_r2a = results1.rsquared_adj
-        # m1_pvals = results1.pvalues
+        # relabel
+        label = re.sub('[!@#$\/]', '', events_list_m[i])
+
+        # Model 1 statsmodels: linear
+        model1 = sm.OLS(y, x1_ones)  # Linear term
+        results1 = model1.fit()
+        # AIC/BIC/Adjusted R2
+        m1_aic = results1.aic
+        m1_bic = results1.bic
+        m1_r2a = results1.rsquared_adj
+        m1_pvals = results1.pvalues
 
         # Model 2 statsmodels: linear + indicator
         model2 = sm.OLS(y, linear_indicator_ones)  # Linear + indicator
@@ -108,14 +115,44 @@ for g in range(len(genders)):
         m2_pvals = results2.pvalues
         m2_params = results2.params
 
-        # # Model 3 statsmodels: linear + periodic
-        # model3 = sm.OLS(y, linear_periodic_ones)  # linear + periodic
-        # results3 = model3.fit()
-        # # AIC/BIC/Adjusted R2
-        # m3_aic = results3.aic
-        # m3_bic = results3.bic
-        # m3_r2a = results3.rsquared_adj
-        # m3_pvals = results3.pvalues
+        # Residual vs predictor
+        y_pred = results2.fittedvalues
+        residuals = np.reshape(y, (19,1)) - np.reshape(y_pred, (19,1))
+
+        # Residuals plot
+        years = years.astype("int")
+        plt.scatter(years, residuals, label='residuals', color='red')
+        m, b = np.polyfit(years, residuals, 1) # Fit line of best fit parameters
+        plt.plot(years, m*years + b, label='trend') # Annotate line of best fit
+        plt.xlabel("Years")
+        plt.ylabel("Model residuals")
+        plt.ylim(-6,6)
+        plt.locator_params(axis='x', nbins=4)
+        plt.legend()
+        # plt.savefig(label + gender_labels[g] + "_" + str(top)+"_Residuals")
+        # plt.show()
+
+        # Homoscedasticity plot
+        years = years.astype("int")
+        plt.scatter(y_pred, residuals, color='red', label='residuals')
+        m, b = np.polyfit(years, residuals, 1) # Fit line of best fit parameters
+        plt.plot(y_pred, m*years + b, label='trend') # Annotate line of best fit
+        plt.xlabel("Fitted value")
+        plt.ylabel("Model residuals")
+        plt.ylim(-6,6)
+        plt.locator_params(axis='x', nbins=4)
+        plt.legend()
+        # plt.savefig(label + gender_labels[g] + "_" + str(top)+"_Homoscedasticity")
+        # plt.show()
+
+        # Model 3 statsmodels: linear + periodic
+        model3 = sm.OLS(y, linear_periodic_ones)  # linear + periodic
+        results3 = model3.fit()
+        # AIC/BIC/Adjusted R2
+        m3_aic = results3.aic
+        m3_bic = results3.bic
+        m3_r2a = results3.rsquared_adj
+        m3_pvals = results3.pvalues
         #
         # # Model 4 statsmodels: linear + periodic
         # model4 = sm.OLS(y, linear_indicator_periodic_ones)  # Linear + periodic + indicator
@@ -135,11 +172,8 @@ for g in range(len(genders)):
         # m5_r2a = results5.rsquared_adj
         # m5_pvals = results5.pvalues
 
-        # relabel
-        label = re.sub('[!@#$\/]', '', events_list_m[i])
-
         # Summary of results
-        print(label + gender_labels[g], results2.summary())
+        print(label + gender_labels[g], results1.summary())
 
         # Plotting grid
         # Model 1, Model 2, Model 3, Model 4 fit (statsmodels)
@@ -156,11 +190,11 @@ for g in range(len(genders)):
         plt.legend()
         # plt.title(events_list_m[i] + "_" + gender_labels[g] + "_" + str(top))
         plt.savefig(label + gender_labels[g] + "_" + str(top))
-        # plt.show()
+        plt.show()
 
         # Append AIC/BIC/Adjusted R^2/p values to list
-        # AIC_list.append([events_list_m[i] + "_" + gender_labels[g], m1_aic, m2_aic, m3_aic, m4_aic, m5_aic])
-        # BIC_list.append([events_list_m[i] + "_" + gender_labels[g], m1_bic, m2_bic, m3_bic, m4_bic, m5_bic])
+        AIC_list.append([events_list_m[i] + "_" + gender_labels[g], m2_aic])
+        BIC_list.append([events_list_m[i] + "_" + gender_labels[g], m2_bic])
         # r2_list.append([events_list_m[i] + "_" + gender_labels[g], m1_r2a, m2_r2a])
         # pvals_list.append([events_list_m[i] + "_" + gender_labels[g], m1_pvals, m2_pvals, m3_pvals, m4_pvals, m5_pvals])
         params_list.append([events_list_m[i] + "_" + gender_labels[g], m2_params])
@@ -173,8 +207,8 @@ for g in range(len(genders)):
         # print("Model 5", results5.summary())
 
 # Print RMSE and R2
-# print(AIC_list)
-# print(BIC_list)
-# print(r2_list)
+print(AIC_list)
+print(BIC_list)
 print(params_list)
+# print(r2_list)
 # print(pvals_list)

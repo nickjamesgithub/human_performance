@@ -11,8 +11,8 @@ import statsmodels.api as sm
 # Turn plots on/off with True/False
 make_plots = False # True/False
 
-# Top 10/100 athletes
-top = 10 # 10/100
+# Top 1/10/100 athletes
+top = 10 # 1/10/100
 
 path = '/Users/tassjames/Desktop/Olympic_data/olympic_data/field' # use your path
 all_files = glob.glob(path + "/*.csv")
@@ -67,18 +67,33 @@ for g in range(len(genders)):
                 year_event_top10 = event_i.loc[(event_i['Date'] == years[j]), 'Mark'][:10]
                 mean_year_event = year_event_top10.mean()
                 means.append(mean_year_event)
+            if top == 1:
+                year_event_top1 = event_i.loc[(event_i['Date'] == years[j]), 'Mark'][:1]
+                mean_year_event = year_event_top1
+                means.append(mean_year_event)
 
         # Slice response variable and two predictors
         y = np.array(means).reshape(-1,1)
         x1 = np.reshape(np.linspace(1,19,19), (len(years),1)) # Linear
         x1_ones = sm.tools.tools.add_constant(x1)
         x2 = np.reshape(generate_olympic_data(x1), (19,1)) # Indicator
+        x3 = np.cos(np.pi / 2 * x1)  # Periodic cos wave
 
         # Combinations of features
         linear_indicator = np.concatenate((x1,x2),axis=1) # linear + indicator
 
         # Add column of ones
         linear_indicator_ones = sm.tools.tools.add_constant(linear_indicator)
+
+        # Combinations of features
+        linear_indicator = np.concatenate((x1,x2),axis=1) # linear + indicator
+        linear_periodic = np.concatenate((x1,x3),axis=1) # Linear + periodic
+        linear_indicator_periodic = np.concatenate((x1,x2,x3),axis=1) # Linear + periodic + indicator
+
+        # Add column of ones
+        linear_periodic_ones = sm.tools.tools.add_constant(linear_periodic)
+        linear_indicator_periodic_ones = sm.tools.tools.add_constant(linear_indicator_periodic)
+        periodic_ones = sm.tools.tools.add_constant(x3)
 
         # Model 1 statsmodels: linear
         model1 = sm.OLS(y, x1_ones) # Linear term
@@ -99,11 +114,59 @@ for g in range(len(genders)):
         # m2_pvals = results2.pvalues
         m2_params = results2.params
 
+        # Model 4 statsmodels: linear + periodic
+        model4 = sm.OLS(y, linear_indicator_periodic_ones)  # Linear + periodic + indicator
+        results4 = model4.fit()
+        # AIC/BIC/Adjusted R2
+        m4_aic = results4.aic
+        m4_bic = results4.bic
+        m4_r2a = results4.rsquared_adj
+        m4_pvals = results4.pvalues
+
+        # # # Model 5 statsmodels: linear + periodic
+        model5 = sm.OLS(y, linear_indicator_periodic_ones)  # Linear, periodic
+        results5 = model5.fit()
+        # # # AIC/BIC/Adjusted R2
+        # # m5_aic = results5.aic
+        # # m5_bic = results5.bic
+        # # m5_r2a = results5.rsquared_adj
+        # # m5_pvals = results5.pvalues
+
         # relabel
         label = re.sub('[!@#$\/]', '', events_list_m[i])
 
+        # Residual vs predictor
+        y_pred = results2.fittedvalues
+        residuals = np.reshape(y, (19,1)) - np.reshape(y_pred, (19,1))
+
+        # Residuals plot
+        years = years.astype("int")
+        plt.scatter(years, residuals, label='residuals', color='red')
+        m, b = np.polyfit(years, residuals, 1) # Fit line of best fit parameters
+        plt.plot(years, m*years + b, label='trend') # Annotate line of best fit
+        plt.xlabel("Years")
+        plt.ylabel("Model residuals")
+        plt.ylim(-6,6)
+        plt.locator_params(axis='x', nbins=4)
+        plt.legend()
+        # plt.savefig(label + gender_labels[g] + "_" + str(top)+"_Residuals")
+        # plt.show()
+
+        # Homoscedasticity plot
+        years = years.astype("int")
+        plt.scatter(y_pred, residuals, color='red', label='residuals')
+        m, b = np.polyfit(years, residuals, 1) # Fit line of best fit parameters
+        plt.plot(y_pred, m*years + b, label='trend') # Annotate line of best fit
+        plt.xlabel("Fitted value")
+        plt.ylabel("Model residuals")
+        plt.ylim(-6,6)
+        plt.locator_params(axis='x', nbins=4)
+        plt.legend()
+        # plt.savefig(label + gender_labels[g] + "_" + str(top)+"_Homoscedasticity")
+        # plt.show()
+
         # Summary of results
-        print(label + gender_labels[g], results2.summary())
+        print(label + gender_labels[g], results4.summary())
 
         # Model 1, Model 2, Model 3, Model 4 fit (statsmodels)
         fig,ax = plt.subplots()
@@ -117,7 +180,7 @@ for g in range(len(genders)):
         plt.xlabel("Date")
         plt.legend()
         # plt.title(events_list_m[i]+"_"+gender_labels[g] + "_" + str(top))
-        plt.savefig(label + gender_labels[g] + "_" + str(top))
+        # plt.savefig(label + gender_labels[g] + "_" + str(top))
         # plt.show()
 
         # Append AIC/BIC/Adjusted R^2/p values to list
@@ -133,7 +196,7 @@ for g in range(len(genders)):
         # print("Model 3",results3.summary())
         # print("Model 4", results4.summary())
 
-# # Print RMSE and R2
+# Print RMSE and R2
 # print(AIC_list)
 # print(BIC_list)
 # print(r2_list)

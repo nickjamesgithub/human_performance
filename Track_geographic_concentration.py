@@ -7,6 +7,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 import re
 
+gini_sample = 10 # 10/100
 # We better push our code!
 make_plots = False
 path = '/Users/tassjames/Desktop/Olympic_data/olympic_data/track' # use your path
@@ -47,6 +48,7 @@ years = np.linspace(2001,2019,19)
 years = years.astype("int")
 coordinates = pd.read_csv("/Users/tassjames/Desktop/Olympic_data/olympic_data/country_coordinates_olympic.csv")
 geographic_concentration_norms = []
+geographic_concentration_gini = [] # geographic concentration gini
 event_labels = []
 
 # def haversine(lon1, lat1, lon2, lat2):
@@ -61,6 +63,30 @@ for g in range(len(genders)):
             geo_country_event = event.loc[(event['Date_Y'] == years[j]), 'Nat']
             # geo_country_event_m_s = geo_country_event_m.str.replace('"', '')
             geo_list_year.append(np.array(geo_country_event))
+
+        def gini(list_of_values):
+            sorted_list = sorted(list_of_values)
+            height, area = 0, 0
+            for value in sorted_list:
+                height += value
+                area += height - value / 2.
+            fair_area = height * len(list_of_values) / 2.
+            return (fair_area - area) / fair_area
+
+        # Gini index
+        from sklearn.preprocessing import LabelEncoder
+        label_encoder = LabelEncoder()
+        gini_coeff_list = []
+        for gc in range(len(geo_list_year)):
+            if gini_sample == 100:
+                values = label_encoder.fit_transform(geo_list_year[gc]) # Transform categorical data into integers
+                gini_coeffs = gini(values)
+                gini_coeff_list.append(gini_coeffs) # append gini coefficients
+            if gini_sample == 10:
+                slice = geo_list_year[gc][:10]
+                values = label_encoder.fit_transform(slice) # Transform categorical data into integers
+                gini_coeffs = gini(values)
+                gini_coeff_list.append(gini_coeffs) # append gini coefficients
 
         # Loop over each year and get lat and long from each country
         lats_longs = []
@@ -119,6 +145,7 @@ for g in range(len(genders)):
 
         # Append Geographic concentration norms
         geographic_concentration_norms.append(norms)
+        geographic_concentration_gini.append(gini_coeff_list)
         event_labels.append([gender_labels[g], events_list_m[i]])
 
         # Print out event ordering
@@ -129,6 +156,18 @@ print(event_labels)
 
 event_names = ["M 10k", "M 1500m", "M 3k", "M 5k", "M 800m", "M 100m", "M 200m", "M 400m",
                "W 10k", "W 1500m", "W 3k", "W 5k", "W 800m", "W 100m", "W 200m", "W 400m"]
+
+# Loop over sequential norms
+total_gini_conc_vector = []
+for i in range(len(geographic_concentration_gini)):
+    # title = event_names[i]
+    total_concentration = np.sum(geographic_concentration_gini[i])
+    total_gini_conc_vector.append([total_concentration, event_names[i]])
+    plt.plot(geographic_concentration_gini[i], label=event_names[i])
+plt.title("Track geographic concentration (Gini)")
+plt.legend()
+plt.savefig("Track_geographic_concentration_gini"+str(gini_sample))
+plt.show()
 
 # Loop over sequential norms
 total_conc_vector = []
@@ -142,23 +181,35 @@ plt.legend()
 plt.savefig("Track_geographic_concentration")
 plt.show()
 
+# Make it an array Concentration (Gini)
+gini_concentration_scores = np.array(total_gini_conc_vector)
+gini_concentation_ordered = gini_concentration_scores[gini_concentration_scores[:, 0].argsort()]
+print(gini_concentation_ordered)
+
 # Make it an array Concentration
 concentration_scores = np.array(total_conc_vector)
 concentation_ordered = concentration_scores[concentration_scores[:, 0].argsort()]
 print(concentation_ordered)
 
-# # Check largest and smallest geographic dispersion and get indices: Index 1 and 5
-# date_grid = np.linspace(2001,2019,19)
-# fig,ax = plt.subplots()
-# plt.plot(date_grid, geographic_concentration_norms[11], label="Women's 5k")
-# plt.plot(date_grid, geographic_concentration_norms[14], label="Women's 200m")
-# plt.xlabel("Date")
-# plt.ylabel("Distance matrix norm")
-# plt.locator_params(axis='x', nbins=4)
-# plt.tight_layout()
-# plt.legend()
-# plt.savefig("Geographic_two_plot_track")
-# plt.show()
+# Compute linear model components for long jump and hammer throw
+date_grid = np.linspace(2001,2019,19)
+five_k_m, five_k_b = np.polyfit(date_grid, geographic_concentration_norms[11], 1)
+two_hundred_m, two_hundred_b = np.polyfit(date_grid, geographic_concentration_norms[14], 1)
+
+# Check largest and smallest geographic dispersion and get indices: Index 1 and 5
+date_grid = np.linspace(2001,2019,19)
+fig,ax = plt.subplots()
+plt.scatter(date_grid, geographic_concentration_norms[11], label="Women's 5k", color='blue', alpha=0.7)
+plt.plot(date_grid, five_k_m * date_grid + five_k_b, color='blue', alpha=0.7)
+plt.scatter(date_grid, geographic_concentration_norms[14], label="Women's 200m", color='red', alpha=0.7)
+plt.plot(date_grid, two_hundred_m * date_grid + two_hundred_b, color='red', alpha=0.7)
+plt.xlabel("Date")
+plt.ylabel("Distance matrix norm")
+plt.locator_params(axis='x', nbins=4)
+plt.tight_layout()
+plt.legend()
+plt.savefig("Geographic_two_plot_track")
+plt.show()
 
 
 

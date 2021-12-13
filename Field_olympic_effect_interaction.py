@@ -10,7 +10,7 @@ import re
 import statsmodels.api as sm
 
 # Turn plots on/off with True/False
-make_plots = True # True/False
+make_plots = False # True/False
 
 # Top 10/100 athletes
 top = 100 # 10/100
@@ -102,7 +102,7 @@ for i in range(len(events_list_m)):
 
     # Model results
     print(result_basic.summary())
-    print(result_interaction.summary())
+    # print(result_interaction.summary())
 
     # relabel
     label = re.sub('[!@#$\/]', '', events_list_m[i])
@@ -142,13 +142,14 @@ for i in range(len(events_list_m)):
         plt.show()
 
 print(basic_params_list)
-# # Print lists
-basic_params_df = pd.DataFrame(basic_params_list)
-basic_pvals_df = pd.DataFrame(basic_pvalues_list)
-basic_params_df.to_csv("/Users/tassjames/Desktop/Olympic_data/Howard_interaction/basic_params_field.csv")
-basic_pvals_df.to_csv("/Users/tassjames/Desktop/Olympic_data/Howard_interaction/basic_pvals_field.csv")
 
-interaction_params_df = pd.DataFrame(interaction_params_list)
-interaction_pvals_df = pd.DataFrame(interaction_pvalues_list)
-interaction_params_df.to_csv("/Users/tassjames/Desktop/Olympic_data/Howard_interaction/interaction_params_field.csv")
-interaction_pvals_df.to_csv("/Users/tassjames/Desktop/Olympic_data/Howard_interaction/interaction_pvals_field.csv")
+# # # Print lists
+# basic_params_df = pd.DataFrame(basic_params_list)
+# basic_pvals_df = pd.DataFrame(basic_pvalues_list)
+# basic_params_df.to_csv("/Users/tassjames/Desktop/Olympic_data/Howard_interaction/basic_params_field.csv")
+# basic_pvals_df.to_csv("/Users/tassjames/Desktop/Olympic_data/Howard_interaction/basic_pvals_field.csv")
+#
+# interaction_params_df = pd.DataFrame(interaction_params_list)
+# interaction_pvals_df = pd.DataFrame(interaction_pvalues_list)
+# interaction_params_df.to_csv("/Users/tassjames/Desktop/Olympic_data/Howard_interaction/interaction_params_field.csv")
+# interaction_pvals_df.to_csv("/Users/tassjames/Desktop/Olympic_data/Howard_interaction/interaction_pvals_field.csv")
